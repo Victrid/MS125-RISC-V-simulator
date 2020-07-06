@@ -1,8 +1,8 @@
 #include "parser.hpp"
 #include "globaldef.hpp"
 
-Parser::Parser(const char* filepath) : file(filepath) {
-    if (!file)
+Parser::Parser(const char* filepath) : file(new fstream(filepath)) {
+    if (!(*file))
         throw runtime_error("File error");
 }
 
@@ -14,7 +14,7 @@ int Parser::hextoint(char c) {
 }
 
 mempair Parser::getline() {
-    file >> inputline;
+    (*file) >> inputline;
     if (inputline[0] == '@') {
         baseaddr = 0;
         for (int i = 0; i < 8; i++) {
@@ -23,7 +23,7 @@ mempair Parser::getline() {
         }
         return getline();
     }
-    file >> (inputline + 2) >> (inputline + 4) >> (inputline + 6);
+    (*file) >> (inputline + 2) >> (inputline + 4) >> (inputline + 6);
     unsigned int operation = 0;
     for (int i = 3; i >= 0; i--) {
         operation <<= 8;
@@ -44,12 +44,11 @@ command Parser::Constructor(unsigned int operation, unsigned int baseaddr) {
         return IConstructor(operation, baseaddr);
         break;
     case 0x00:
-
         break;
     }
 }
 taddr Parser::getdigits(taddr content, int l, int r) {
-    return (content - (content >> r << r)) >> l;
+    return (content - (content >> (r + 1) << (r + 1))) >> (l + 1);
 };
 command Parser::RConstructor(unsigned int operation, unsigned int baseaddr) {
     command c;

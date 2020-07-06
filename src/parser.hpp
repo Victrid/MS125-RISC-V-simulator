@@ -9,8 +9,8 @@
 using namespace std;
 
 class Parser {
-private:
-    fstream file;
+public:
+    istream* file;
     taddr baseaddr;
     char inputline[100];
     int hextoint(char c);
@@ -23,7 +23,7 @@ private:
     taddr getdigits(taddr content, int low, int high);
 
 public:
-    Parser() : file() {}
+    Parser() : file() { file = &cin; }
     Parser(const char* filepath);
     mempair getline();
 };
