@@ -37,13 +37,19 @@ mempair Parser::getline() {
 command Parser::Constructor(unsigned int operation, unsigned int baseaddr) {
     taddr opcode = (operation - (operation >> 7 << 7)) >> 2;
     switch (opcode) {
-    case 0x18:
-        return BConstructor(operation, baseaddr);
+    case 0b01100:
+        return RConstructor(operation, baseaddr);
         break;
-    case 0x04:
+    case 0b00100: {
+        int p = getdigits(operation, 11, 14);
+        if (p != 0b001 && p != 0b101)
+            return IConstructor(operation, baseaddr);
+        else
+            return IsConstructor(operation, baseaddr);
+        break;
+    }
+    case 0b00000:
         return IConstructor(operation, baseaddr);
-        break;
-    case 0x00:
         break;
     }
 }
@@ -91,8 +97,7 @@ command Parser::SConstructor(unsigned int operation, unsigned int baseaddr) {
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
     c.rs2         = getdigits(operation, 19, 24);
-    c.imm         = 0xffffffff;
-    c.imm ^= ~((getdigits(operation, 24, 31) << 5) + getdigits(operation, 6, 11));
+    c.imm         = (getdigits(operation, 24, 31) << 5) + getdigits(operation, 6, 11);
     return c;
 }
 command Parser::UConstructor(unsigned int operation, unsigned int baseaddr) {
