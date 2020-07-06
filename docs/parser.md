@@ -14,7 +14,7 @@ Here are the instruction on the RISC-V manual.
 
 ![image-20200706155102937](image-20200706155102937.png)
 
-Except for the 5-bit immediates used in CSR instructions, immediates are always sign-extended, and are generally packed towards the leftmost available bits in the instruction and have been allocated to reduce hardware complexity. In particular, the sign bit for all immediates is always in bit 31 of the instruction to speed sign-extension circuitry.
+Except for the 5-bit immediates used in CSR instructions <a name="rf1">⚓</a>, immediates are always sign-extended, and are generally packed towards the leftmost available bits in the instruction and have been allocated to reduce hardware complexity. In particular, the sign bit for all immediates is always in bit 31 of the instruction to speed sign-extension circuitry.
 
 **立即数的符号拓展**: 摘自Wikipedia.
 
@@ -36,10 +36,14 @@ To make it simple, you add ones if the highest digit is 1 (negative) and zeros i
 
 ![image-20200706155537090](image-20200706155537090.png)
 
-B-type instructions have even immediate number, making so imm[0]is omitted.
+B-type instructions have even immediate number, making so `imm[0]` is omitted.
 
 ![image-20200706155551485](image-20200706155551485.png)
 
 The location of instruction bits in the U and J format immediates is chosen to maximize overlap with the other formats and with each other.
 
-### Integer Computational Instructions
+**shamt:** shift amount
+
+[Stack Overflow](https://stackoverflow.com/questions/42298544/what-is-stored-in-the-shift-amount-field-of-r-type-instructions): shamt stands for shift amount which will contain the number by which you want you shift, in `sll $s0,$so,2`, the shamt will be 2 in binary: `00010`
+
+It can (and should be treated) as some special immediate. [REF](#rf1) immediates padding
