@@ -1,7 +1,12 @@
 #ifndef __globaldef_hpp__
 #define __globaldef_hpp__
-
 using taddr = unsigned int;
+
+struct mempair {
+    taddr address;
+    taddr instruction;
+};
+
 struct command {
     taddr addr;
     enum { R,

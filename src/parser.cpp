@@ -13,7 +13,7 @@ int Parser::hextoint(char c) {
         return c - 'A' + 10;
 }
 
-command Parser::getline() {
+mempair Parser::getline() {
     file >> inputline;
     if (inputline[0] == '@') {
         baseaddr = 0;
@@ -29,12 +29,24 @@ command Parser::getline() {
         operation <<= 8;
         operation += (hextoint(inputline[i << 1]) << 4) + hextoint(inputline[i << 1 | 1]);
     }
-    Constructor(operation, baseaddr);
+    mempair ret{baseaddr, operation};
     baseaddr += 4;
+    return ret;
 }
+
 command Parser::Constructor(unsigned int operation, unsigned int baseaddr) {
     taddr opcode = (operation - (operation >> 7 << 7)) >> 2;
-    //TODO
+    switch (opcode) {
+    case 0x18:
+        return BConstructor(operation, baseaddr);
+        break;
+    case 0x04:
+        return IConstructor(operation, baseaddr);
+        break;
+    case 0x00:
+
+        break;
+    }
 }
 taddr Parser::getdigits(taddr content, int l, int r) {
     return (content - (content >> r << r)) >> l;
@@ -67,6 +79,29 @@ command Parser::SConstructor(unsigned int operation, unsigned int baseaddr) {
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
     c.rs2         = getdigits(operation, 19, 24);
-    c.imm         = (getdigits(operation, 24, 31) << 5) + getdigits(operation, 6, 11);
+    c.imm         = 0xffffffff;
+    c.imm ^= ~((getdigits(operation, 24, 31) << 5) + getdigits(operation, 6, 11));
     return c;
+}
+command Parser::UConstructor(unsigned int operation, unsigned int baseaddr) {
+    //? TODO
+    command c;
+    c.addr        = baseaddr;
+    c.instruction = command::U;
+    c.rd          = getdigits(operation, 6, 11);
+    c.funct3      = getdigits(operation, 11, 14);
+    c.rs1         = getdigits(operation, 14, 19);
+    c.imm         = 0xffffffff;
+    c.imm ^= ~getdigits(operation, 19, 31);
+    return c;
+}
+command Parser::BConstructor(unsigned int operation, unsigned int baseaddr) {
+    //?
+    command c;
+    c.addr        = baseaddr;
+    c.instruction = command::B;
+    c.funct3      = getdigits(operation, 11, 14);
+    c.rs1         = getdigits(operation, 14, 19);
+    c.rs2         = getdigits(operation, 19, 24);
+    //TODO
 }

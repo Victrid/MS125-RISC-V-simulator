@@ -25,7 +25,7 @@ private:
 public:
     Parser() : file() {}
     Parser(const char* filepath);
-    command getline();
+    mempair getline();
 };
 
 #endif
