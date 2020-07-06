@@ -48,6 +48,8 @@ command Parser::Constructor(unsigned int operation, unsigned int baseaddr) {
     }
 }
 taddr Parser::getdigits(taddr content, int l, int r) {
+    if (r == 31)
+        return content >> (l + 1);
     return (content - (content >> (r + 1) << (r + 1))) >> (l + 1);
 };
 command Parser::RConstructor(unsigned int operation, unsigned int baseaddr) {

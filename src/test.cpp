@@ -53,13 +53,24 @@ TEST(ParserTest, RConstructor) {
     auto z = P.RConstructor(0x00f54533, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::R);
-    EXPECT_EQ(z.rd, 0b01010)<<z.rd;
+    EXPECT_EQ(z.rd, 0b01010) << z.rd;
     EXPECT_EQ(z.funct3, 0b100);
     EXPECT_EQ(z.rs1, 0b01010);
     EXPECT_EQ(z.rs2, 0b01111);
     EXPECT_EQ(z.funct7, 0);
 }
 
+TEST(ParserTest, IConstructor) {
+    Parser P("dataset/array_test2.data");
+    //addi	a0,a0,173 ADDI rd,rs1,imm
+    auto z = P.IConstructor(0x0ad50513, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.rd, 0b01010);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b01010);
+    EXPECT_EQ(z.imm, 0b000010101101);
+}
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
