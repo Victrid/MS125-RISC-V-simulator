@@ -47,7 +47,7 @@ TEST(ParserTest, getline_2) {
     EXPECT_EQ(t1.instruction, 0x1c072683);
 }
 
-TEST(ParserTest, RConstructor) {
+TEST(ParserTest, RConstructor_XOR) {
     Parser P("dataset/array_test2.data");
     //xor	a0,a0,a5
     auto z = P.RConstructor(0x00f54533, 0x1357ABCD);
@@ -60,7 +60,7 @@ TEST(ParserTest, RConstructor) {
     EXPECT_EQ(z.funct7, 0);
 }
 
-TEST(ParserTest, IConstructor) {
+TEST(ParserTest, IConstructor_ADDI) {
     Parser P("dataset/array_test2.data");
     //addi	a0,a0,173 ADDI rd,rs1,imm
     auto z = P.IConstructor(0x0ad50513, 0x1357ABCD);
@@ -70,6 +70,30 @@ TEST(ParserTest, IConstructor) {
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b01010);
     EXPECT_EQ(z.imm, 0b000010101101);
+}
+TEST(ParserTest, IsConstructor_SRLI_1) {
+    Parser P("dataset/array_test2.data");
+    //srli	a3,a3,0x1
+    auto z = P.IsConstructor(0x0016d693, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::Is);
+    EXPECT_EQ(z.rd, 0b01101);
+    EXPECT_EQ(z.funct3, 0b101);
+    EXPECT_EQ(z.rs1, 0b01101);
+    EXPECT_EQ(z.imm, 0b1);
+    EXPECT_EQ(z.funct7, 0);
+}
+TEST(ParserTest, IsConstructor_SRLI_2) {
+    Parser P("dataset/array_test2.data");
+    //srli	a2,a2,0x1
+    auto z = P.IsConstructor(0x00165613, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::Is);
+    EXPECT_EQ(z.rd, 0b01100);
+    EXPECT_EQ(z.funct3, 0b101);
+    EXPECT_EQ(z.rs1, 0b01100);
+    EXPECT_EQ(z.imm, 0b1);
+    EXPECT_EQ(z.funct7, 0);
 }
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);

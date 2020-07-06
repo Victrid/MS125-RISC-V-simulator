@@ -73,6 +73,17 @@ command Parser::IConstructor(unsigned int operation, unsigned int baseaddr) {
     c.imm         = getdigits(operation, 19, 31);
     return c;
 }
+command Parser::IsConstructor(unsigned int operation, unsigned int baseaddr) {
+    command c;
+    c.addr        = baseaddr;
+    c.instruction = command::Is;
+    c.rd          = getdigits(operation, 6, 11);
+    c.funct3      = getdigits(operation, 11, 14);
+    c.rs1         = getdigits(operation, 14, 19);
+    c.imm         = getdigits(operation, 19, 24);
+    c.funct7      = getdigits(operation, 24, 31);
+    return c;
+}
 command Parser::SConstructor(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;

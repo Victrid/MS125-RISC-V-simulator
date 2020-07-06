@@ -17,6 +17,7 @@ public:
     command Constructor(taddr operation, taddr baseaddr);
     command RConstructor(taddr operation, taddr baseaddr);
     command IConstructor(taddr operation, taddr baseaddr);
+    command IsConstructor(taddr operation, taddr baseaddr);
     command SConstructor(taddr operation, taddr baseaddr);
     command UConstructor(taddr operation, taddr baseaddr);
     command BConstructor(taddr operation, taddr baseaddr);
