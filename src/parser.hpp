@@ -11,10 +11,16 @@ using namespace std;
 class Parser {
 private:
     fstream file;
-    unsigned int baseaddr;
+    taddr baseaddr;
     char inputline[100];
     int hextoint(char c);
-    static int Bseries[] = {};
+    command Constructor(taddr operation, taddr baseaddr);
+    command RConstructor(taddr operation, taddr baseaddr);
+    command IConstructor(taddr operation, taddr baseaddr);
+    command SConstructor(taddr operation, taddr baseaddr);
+    command UConstructor(taddr operation, taddr baseaddr);
+    command BConstructor(taddr operation, taddr baseaddr);
+    taddr getdigits(taddr content, int low, int high);
 
 public:
     Parser() : file() {}
