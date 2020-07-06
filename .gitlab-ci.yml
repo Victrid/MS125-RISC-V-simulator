@@ -1,0 +1,19 @@
+stages:
+  - clean
+  - build
+  - test
+
+clean:
+  stage: clean
+  script:
+    - make clean
+
+build:
+  stage: build
+  script:
+    - echo "Nothing to do now."
+
+test:
+  stage: test
+  script:
+    - make unit_test
