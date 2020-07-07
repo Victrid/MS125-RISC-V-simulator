@@ -19,6 +19,7 @@ public:
     command RSplitter(taddr operation, taddr baseaddr);
     command ISplitter(taddr operation, taddr baseaddr);
     command IsSplitter(taddr operation, taddr baseaddr);
+    command IlSplitter(taddr operation, taddr baseaddr);
     command SSplitter(taddr operation, taddr baseaddr);
     command USplitter(taddr operation, taddr baseaddr);
     command BSplitter(taddr operation, taddr baseaddr);
@@ -31,5 +32,7 @@ public:
     mempair getline();
     ostream& displayer(command& c, ostream& os);
 };
+
+void showfile()
 
 #endif

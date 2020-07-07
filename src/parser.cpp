@@ -58,12 +58,11 @@ command Parser::Splitter(unsigned int operation, unsigned int baseaddr) {
         break;
     }
     case 0b11001:
-    case 0b00000:
         return ISplitter(operation, baseaddr);
-        break;
+    case 0b00000:
+        return IlSplitter(operation, baseaddr);
     case 0b01000:
         return SSplitter(operation, baseaddr);
-        break;
     case 0b01101:
     case 0b00101:
         return USplitter(operation, baseaddr);
@@ -94,6 +93,17 @@ command Parser::ISplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
     c.instruction = getdigits(operation, 1, 6) == 0b11001 ? command::Ij : command::I;
+    c.rd          = getdigits(operation, 6, 11);
+    c.funct3      = getdigits(operation, 11, 14);
+    c.rs1         = getdigits(operation, 14, 19);
+    c.imm         = getdigits(operation, 19, 31);
+    padimm(c.imm, 12);
+    return c;
+}
+command Parser::IlSplitter(unsigned int operation, unsigned int baseaddr) {
+    command c;
+    c.addr        = baseaddr;
+    c.instruction = command::Il;
     c.rd          = getdigits(operation, 6, 11);
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
@@ -154,13 +164,15 @@ command Parser::JSplitter(unsigned int operation, unsigned int baseaddr) {
     return c;
 }
 
-ostream& displayer(command& z, ostream& os) {
+ostream& Parser::displayer(command& z, ostream& os) {
     const char* cc[] = {
         "R ",
         "I ",
+        "Il",
         "Ij",
         "S ",
         "U ",
+        "Ua",
         "J ",
         "B "};
     const char* reg[] = {
@@ -196,49 +208,48 @@ ostream& displayer(command& z, ostream& os) {
         "t4",
         "t5",
         "t6"};
-    os << z.addr
-       << "\t";
+    os << z.addr << '\t';
     os << cc[z.instruction] << ' ';
     switch (z.instruction) {
     case command::B:
         switch (z.funct3) {
         case 0b000: {
-            os << "beq\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            os << "beq\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
             int imp;
             memcpy(&imp, &(z.imm), sizeof(imp));
             os << imp;
             break;
         }
         case 0b001: {
-            os << "bne\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            os << "bne\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
             int imp;
             memcpy(&imp, &(z.imm), sizeof(imp));
             os << imp;
             break;
         }
         case 0b100: {
-            os << "blt\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            os << "blt\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
             int imp;
             memcpy(&imp, &(z.imm), sizeof(imp));
             os << imp;
             break;
         }
         case 0b101: {
-            os << "bge\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            os << "bge\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
             int imp;
             memcpy(&imp, &(z.imm), sizeof(imp));
             os << imp;
             break;
         }
         case 0b110: {
-            os << "bltu\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            os << "bltu\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
             int imp;
             memcpy(&imp, &(z.imm), sizeof(imp));
             os << imp;
             break;
         }
         case 0b111: {
-            os << "bgeu\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            os << "bgeu\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
             int imp;
             memcpy(&imp, &(z.imm), sizeof(imp));
             os << imp;
@@ -247,13 +258,201 @@ ostream& displayer(command& z, ostream& os) {
         }
         break;
     case command::J: {
-        os << "jal\t" << reg[z.rd] << "\t";
+        os << "jal\t" << reg[z.rd] << '\t';
         int imp;
         memcpy(&imp, &(z.imm), sizeof(imp));
         os << imp;
     } break;
     case command::U: {
+        os << "lui\t" << reg[z.rd] << '\t';
+        int imp;
+        memcpy(&imp, &(z.imm), sizeof(imp));
+        os << imp;
+    } break;
+    case command::Ua: {
+        os << "auipc\t" << reg[z.rd] << '\t';
+        int imp;
+        memcpy(&imp, &(z.imm), sizeof(imp));
+        os << imp;
+    } break;
+    case command::S: {
+        switch (z.funct3) {
+        case 0b000: {
+            os << "sb\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b001: {
+            os << "sh\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b010: {
+            os << "sw\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        }
+    } break;
+    case command::Il: {
+        switch (z.funct3) {
+        case 0b000: {
+            os << "lb\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b001: {
+            os << "lh\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b010: {
+            os << "lw\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b100: {
+            os << "lbu\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b101: {
+            os << "lhu\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        }
+    } break;
+    case command::I: {
+        switch (z.funct3) {
+        case 0b000: {
+            os << "addi\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b010: {
+            os << "slti\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b100: {
+            os << "xori\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b110: {
+            os << "ori\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b111: {
+            os << "andi\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b001: {
+            os << "slli\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << z.imm;
+            os << z.imm;
+            break;
+        }
+        case 0b101: {
+            if (z.funct7 == 0) {
+                os << "srli\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << z.imm;
+            } else {
+                os << "srai\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << z.imm;
+            }
+            break;
+        }
+        }
+        break;
+    }
+    case command::Ij: {
+        os << "jalr\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t';
+        int imp;
+        memcpy(&imp, &(z.imm), sizeof(imp));
+        os << imp;
+        break;
+    }
+    case command::R: {
+        switch (z.funct3) {
+        case 0b000: {
+            if (z.funct7 == 0) {
+                os << "add\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            } else {
+                os << "sub\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            }
+            break;
+        }
+        case 0b001: {
+            os << "sll\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            break;
+        }
+        case 0b010: {
+            os << "slt\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            break;
+        }
+        case 0b011: {
+            os << "sltu\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            break;
+        }
+        case 0b100: {
+            os << "xor\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            break;
+        }
+        case 0b101: {
+            if (z.funct7 == 0) {
+                os << "srl\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            } else {
+                os << "sra\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            }
+            break;
+        }
+        case 0b110: {
+            os << "or\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            break;
+        }
+        case 0b111: {
+            os << "and\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << reg[z.rs2];
+            break;
+        }
+        }
     }
     }
-    cout << z.funct3 << ' ' << z.funct7 << ' ' << z.imm << ' ' << z.rs1 << ' ' << z.rs2 << ' ' << z.rd << endl;
+    return os;
 };
+
+void showfile() {
+    Parser P("dataset/array_test1.data");
+    mempair m = P.getline();
+    while (m.instruction != 0) {
+        auto z = P.Splitter(m.instruction, m.address);
+        P.displayer(z, cout) << endl;
+        m = P.getline();
+    }
+}

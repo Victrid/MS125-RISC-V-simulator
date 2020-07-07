@@ -11,6 +11,7 @@ struct command {
     taddr addr;
     enum { R,
            I,
+           Il,
            Ij,
            S,
            U,
@@ -23,6 +24,7 @@ struct command {
     taddr rs1;
     taddr rs2;
     taddr rd;
+    command() : addr(0), instruction(R), funct3(0), funct7(0), imm(0), rs1(0), rs2(0), rd(0){};
 };
 
 #endif

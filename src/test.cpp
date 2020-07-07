@@ -342,12 +342,6 @@ TEST(ParserTest, Totaltest) {
 }
 
 int main(int argc, char** argv) {
-    // Parser P("dataset/array_test1.data");
-    // mempair m = P.getline();
-    // while (m.instruction != 0) {
-    //     auto z = P.Splitter(m.instruction, m.address);
-    //    m = P.getline();
-    // }
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
