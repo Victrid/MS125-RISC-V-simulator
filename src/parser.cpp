@@ -2,45 +2,11 @@
 #include "globaldef.hpp"
 #include <cstring>
 
-Parser::Parser(const char* filepath) : file(new fstream(filepath)) {
-    if (!(*file))
-        throw runtime_error("File error");
-}
-
-int Parser::hextoint(char c) {
-    if ('0' <= c && c <= '9')
-        return c - '0';
-    else
-        return c - 'A' + 10;
-}
-
 void Parser::padimm(taddr& imm, int digit) {
     if (getdigits(imm, digit - 2, digit - 1)) {
         imm = (0xFFFFFFFF << digit) | imm;
     }
     return;
-}
-
-mempair Parser::getline() {
-    if (!((*file) >> inputline))
-        return mempair{0, 0};
-    if (inputline[0] == '@') {
-        baseaddr = 0;
-        for (int i = 0; i < 8; i++) {
-            baseaddr <<= 4;
-            baseaddr += inputline[i + 1] - '0';
-        }
-        return getline();
-    }
-    (*file) >> (inputline + 2) >> (inputline + 4) >> (inputline + 6);
-    unsigned int operation = 0;
-    for (int i = 3; i >= 0; i--) {
-        operation <<= 8;
-        operation += (hextoint(inputline[i << 1]) << 4) + hextoint(inputline[i << 1 | 1]);
-    }
-    mempair ret{baseaddr, operation};
-    baseaddr += 4;
-    return ret;
 }
 
 command Parser::Splitter(unsigned int operation, unsigned int baseaddr) {
@@ -447,12 +413,12 @@ ostream& Parser::displayer(command& z, ostream& os) {
     return os;
 };
 
-void showfile() {
-    Parser P("dataset/array_test1.data");
-    mempair m = P.getline();
-    while (m.instruction != 0) {
-        auto z = P.Splitter(m.instruction, m.address);
-        P.displayer(z, cout) << endl;
-        m = P.getline();
-    }
-}
+// void showfile() {
+//     Parser P("dataset/array_test1.data");
+//     mempair m = P.getline();
+//     while (m.instruction != 0) {
+//         auto z = P.Splitter(m.instruction, m.address);
+//         P.displayer(z, cout) << endl;
+//         m = P.getline();
+//     }
+// }

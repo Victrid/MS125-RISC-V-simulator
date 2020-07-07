@@ -6,12 +6,22 @@
 #include <map>
 #include <vector>
 using namespace std;
+class loader {
+public:
+    istream* file;
+    taddr baseaddr;
+    char inputline[100];
+    int hextoint(char c);
+    mempair getline();
+    loader(const char* filepath);
+    loader() : file() { file = &cin; }
+};
 
 class memory {
 public:
-    map<taddr, command*> page;
-    int load(taddr address, command c);
-    command& get(taddr address);
+    map<taddr, taddr*> page;
+    int load(taddr address, taddr c);
+    taddr& get(taddr address);
     int memload(const char* c);
 
 public:
