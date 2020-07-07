@@ -126,7 +126,7 @@ command Parser::SSplitter(unsigned int operation, unsigned int baseaddr) {
 command Parser::USplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::U;
+    c.instruction = getdigits(operation, 1, 6) == 0b00101 ? command::Ua : command::U;
     c.rd          = getdigits(operation, 6, 11);
     c.imm         = getdigits(operation, 11, 31) << 12;
     return c;
@@ -253,7 +253,6 @@ ostream& displayer(command& z, ostream& os) {
         os << imp;
     } break;
     case command::U: {
-
     }
     }
     cout << z.funct3 << ' ' << z.funct7 << ' ' << z.imm << ' ' << z.rs1 << ' ' << z.rs2 << ' ' << z.rd << endl;

@@ -14,6 +14,7 @@ struct command {
            Ij,
            S,
            U,
+           Ua,
            J,
            B } instruction;
     taddr funct3;

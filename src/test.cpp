@@ -2,6 +2,7 @@
 #include "parser.hpp"
 #include "gtest/gtest.h"
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 TEST(ParserTest, padimm) {
@@ -219,13 +220,35 @@ TEST(ParserTest, SSplitter_2) {
     EXPECT_EQ(z.imm, 0b00000000000000000000000110100000);
 }
 
-TEST(ParserTest, USplitter) {
+TEST(ParserTest, USplitter_LUI) {
     Parser P("dataset/array_test2.data");
-    //sw	zero,416(s0)
+    //lui	sp,0x20
     auto z = P.USplitter(0x00020137, 0x1357ABCD);
     //0b 100000 00010 0110111
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::U);
+    EXPECT_EQ(z.rd, 0b00010);
+    EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
+}
+
+TEST(ParserTest, USplitter_AUIPC) {
+    Parser P("dataset/array_test2.data");
+    //auipc sp,0x20
+    auto z = P.USplitter(0x00020117, 0x1357ABCD);
+    //0b 100000 00010 0010111
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::Ua);
+    EXPECT_EQ(z.rd, 0b00010);
+    EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
+}
+
+TEST(ParserTest, Splitter_11) {
+    Parser P("dataset/array_test2.data");
+    //auipc sp,0x20
+    auto z = P.USplitter(0x00020117, 0x1357ABCD);
+    //0b100000000100010111
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::Ua);
     EXPECT_EQ(z.rd, 0b00010);
     EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
 }
@@ -314,9 +337,17 @@ TEST(ParserTest, Splitter_10) {
     EXPECT_EQ(z.rd, 0b00001);
     EXPECT_EQ(z.imm, 0b11111111111111111111111110011000);
 }
-int main(int argc, char** argv) {
-    Parser P("dataset/array_test2.data");
 
+TEST(ParserTest, Totaltest) {
+}
+
+int main(int argc, char** argv) {
+    // Parser P("dataset/array_test1.data");
+    // mempair m = P.getline();
+    // while (m.instruction != 0) {
+    //     auto z = P.Splitter(m.instruction, m.address);
+    //    m = P.getline();
+    // }
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
