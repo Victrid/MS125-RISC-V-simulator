@@ -12,3 +12,5 @@ int main(int argc, char** argv) {
     return RUN_ALL_TESTS();
 }
 ```
+
+You can refer to the auxiliary documents from google test official.
