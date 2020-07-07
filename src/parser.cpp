@@ -1,5 +1,6 @@
 #include "parser.hpp"
 #include "globaldef.hpp"
+#include <cstring>
 
 Parser::Parser(const char* filepath) : file(new fstream(filepath)) {
     if (!(*file))
@@ -21,7 +22,8 @@ void Parser::padimm(taddr& imm, int digit) {
 }
 
 mempair Parser::getline() {
-    (*file) >> inputline;
+    if (!((*file) >> inputline))
+        return mempair{0, 0};
     if (inputline[0] == '@') {
         baseaddr = 0;
         for (int i = 0; i < 8; i++) {
@@ -63,12 +65,14 @@ command Parser::Splitter(unsigned int operation, unsigned int baseaddr) {
         return SSplitter(operation, baseaddr);
         break;
     case 0b01101:
+    case 0b00101:
         return USplitter(operation, baseaddr);
     case 0b11000:
         return BSplitter(operation, baseaddr);
     case 0b11011:
         return JSplitter(operation, baseaddr);
     }
+    return command();
 }
 taddr Parser::getdigits(taddr content, int l, int r) {
     if (r == 31)
@@ -149,3 +153,108 @@ command Parser::JSplitter(unsigned int operation, unsigned int baseaddr) {
     padimm(c.imm, 20);
     return c;
 }
+
+ostream& displayer(command& z, ostream& os) {
+    const char* cc[] = {
+        "R ",
+        "I ",
+        "Ij",
+        "S ",
+        "U ",
+        "J ",
+        "B "};
+    const char* reg[] = {
+        "zero",
+        "ra",
+        "sp",
+        "gp",
+        "tp",
+        "t0",
+        "t1",
+        "t2",
+        "s0",
+        "s1",
+        "a0",
+        "a1",
+        "a2",
+        "a3",
+        "a4",
+        "a5",
+        "a6",
+        "a7",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8",
+        "s9",
+        "s10",
+        "s11",
+        "t3",
+        "t4",
+        "t5",
+        "t6"};
+    os << z.addr
+       << "\t";
+    os << cc[z.instruction] << ' ';
+    switch (z.instruction) {
+    case command::B:
+        switch (z.funct3) {
+        case 0b000: {
+            os << "beq\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b001: {
+            os << "bne\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b100: {
+            os << "blt\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b101: {
+            os << "bge\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b110: {
+            os << "bltu\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        case 0b111: {
+            os << "bgeu\t" << reg[z.rs1] << "\t" << reg[z.rs2] << "\t";
+            int imp;
+            memcpy(&imp, &(z.imm), sizeof(imp));
+            os << imp;
+            break;
+        }
+        }
+        break;
+    case command::J: {
+        os << "jal\t" << reg[z.rd] << "\t";
+        int imp;
+        memcpy(&imp, &(z.imm), sizeof(imp));
+        os << imp;
+    } break;
+    case command::U: {
+
+    }
+    }
+    cout << z.funct3 << ' ' << z.funct7 << ' ' << z.imm << ' ' << z.rs1 << ' ' << z.rs2 << ' ' << z.rd << endl;
+};

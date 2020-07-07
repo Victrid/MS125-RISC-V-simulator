@@ -29,6 +29,7 @@ public:
     Parser() : file() { file = &cin; }
     Parser(const char* filepath);
     mempair getline();
+    ostream& displayer(command& c, ostream& os);
 };
 
 #endif
