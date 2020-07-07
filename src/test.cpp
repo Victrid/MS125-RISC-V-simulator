@@ -1,4 +1,5 @@
 #include "globaldef.hpp"
+#include "memory.hpp"
 #include "parser.hpp"
 #include "gtest/gtest.h"
 #include <iostream>
@@ -337,7 +338,38 @@ TEST(ParserTest, Splitter_10) {
     EXPECT_EQ(z.rd, 0b00001);
     EXPECT_EQ(z.imm, 0b11111111111111111111111110011000);
 }
-
+TEST(MemTest, Loadtest) {
+    Parser P("dataset/array_test2.data");
+    memory M;
+    mempair m = P.getline();
+    while (m.instruction != 0) {
+        auto z = P.Splitter(m.instruction, m.address);
+        M.load(z.addr, z);
+        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000].instruction, z.instruction);
+        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000].addr, z.addr);
+        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000].funct3, z.funct3);
+        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000].funct7, z.funct7);
+        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000].imm, z.imm);
+        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000].rs1, z.rs1);
+        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000].rs2, z.rs2);
+        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000].rd, z.rd);
+        m = P.getline();
+    }
+}
+TEST(MemTest, MemLoad_get_test) {
+    memory M;
+    M.memload("dataset/array_test2.data");
+    auto t = M.get(0x00001018);
+    auto z = Parser().Splitter(0x00054783, 0x00001018);
+    EXPECT_EQ(t.instruction, z.instruction);
+    EXPECT_EQ(t.addr, z.addr);
+    EXPECT_EQ(t.funct3, z.funct3);
+    EXPECT_EQ(t.funct7, z.funct7);
+    EXPECT_EQ(t.imm, z.imm);
+    EXPECT_EQ(t.rs1, z.rs1);
+    EXPECT_EQ(t.rs2, z.rs2);
+    EXPECT_EQ(t.rd, z.rd);
+}
 TEST(ParserTest, Totaltest) {
 }
 
