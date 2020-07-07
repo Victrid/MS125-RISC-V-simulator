@@ -1,4 +1,3 @@
-#include "bus.hpp"
 #include "globaldef.hpp"
 #include "memory.hpp"
 #include "parser.hpp"
