@@ -33,6 +33,6 @@ public:
     ostream& displayer(command& c, ostream& os);
 };
 
-void showfile()
+void showfile();
 
 #endif
