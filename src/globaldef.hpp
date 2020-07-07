@@ -11,6 +11,7 @@ struct command {
     taddr addr;
     enum { R,
            I,
+           Ij,
            S,
            U,
            J,

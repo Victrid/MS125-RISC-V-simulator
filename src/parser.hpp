@@ -15,13 +15,14 @@ public:
     char inputline[100];
     int hextoint(char c);
     static void padimm(taddr& imm, int digit);
-    command Constructor(taddr operation, taddr baseaddr);
-    command RConstructor(taddr operation, taddr baseaddr);
-    command IConstructor(taddr operation, taddr baseaddr);
-    command IsConstructor(taddr operation, taddr baseaddr);
-    command SConstructor(taddr operation, taddr baseaddr);
-    command UConstructor(taddr operation, taddr baseaddr);
-    command BConstructor(taddr operation, taddr baseaddr);
+    command Splitter(taddr operation, taddr baseaddr);
+    command RSplitter(taddr operation, taddr baseaddr);
+    command ISplitter(taddr operation, taddr baseaddr);
+    command IsSplitter(taddr operation, taddr baseaddr);
+    command SSplitter(taddr operation, taddr baseaddr);
+    command USplitter(taddr operation, taddr baseaddr);
+    command BSplitter(taddr operation, taddr baseaddr);
+    command JSplitter(taddr operation, taddr baseaddr);
     static taddr getdigits(taddr content, int low, int high);
 
 public:

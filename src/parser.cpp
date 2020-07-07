@@ -41,26 +41,33 @@ mempair Parser::getline() {
     return ret;
 }
 
-command Parser::Constructor(unsigned int operation, unsigned int baseaddr) {
+command Parser::Splitter(unsigned int operation, unsigned int baseaddr) {
     taddr opcode = (operation - (operation >> 7 << 7)) >> 2;
     switch (opcode) {
     case 0b01100:
-        return RConstructor(operation, baseaddr);
+        return RSplitter(operation, baseaddr);
         break;
     case 0b00100: {
         int p = getdigits(operation, 11, 14);
         if (p != 0b001 && p != 0b101)
-            return IConstructor(operation, baseaddr);
+            return ISplitter(operation, baseaddr);
         else
-            return IsConstructor(operation, baseaddr);
+            return IsSplitter(operation, baseaddr);
         break;
     }
+    case 0b11001:
     case 0b00000:
-        return IConstructor(operation, baseaddr);
+        return ISplitter(operation, baseaddr);
         break;
     case 0b01000:
-        return SConstructor(operation, baseaddr);
+        return SSplitter(operation, baseaddr);
         break;
+    case 0b01101:
+        return USplitter(operation, baseaddr);
+    case 0b11000:
+        return BSplitter(operation, baseaddr);
+    case 0b11011:
+        return JSplitter(operation, baseaddr);
     }
 }
 taddr Parser::getdigits(taddr content, int l, int r) {
@@ -68,7 +75,7 @@ taddr Parser::getdigits(taddr content, int l, int r) {
         return content >> (l + 1);
     return (content - (content >> (r + 1) << (r + 1))) >> (l + 1);
 };
-command Parser::RConstructor(unsigned int operation, unsigned int baseaddr) {
+command Parser::RSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
     c.instruction = command::R;
@@ -79,10 +86,10 @@ command Parser::RConstructor(unsigned int operation, unsigned int baseaddr) {
     c.funct7      = getdigits(operation, 24, 31);
     return c;
 }
-command Parser::IConstructor(unsigned int operation, unsigned int baseaddr) {
+command Parser::ISplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::I;
+    c.instruction = getdigits(operation, 1, 6) == 0b11001 ? command::Ij : command::I;
     c.rd          = getdigits(operation, 6, 11);
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
@@ -90,7 +97,7 @@ command Parser::IConstructor(unsigned int operation, unsigned int baseaddr) {
     padimm(c.imm, 12);
     return c;
 }
-command Parser::IsConstructor(unsigned int operation, unsigned int baseaddr) {
+command Parser::IsSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
     c.instruction = command::I;
@@ -101,7 +108,7 @@ command Parser::IsConstructor(unsigned int operation, unsigned int baseaddr) {
     c.funct7      = getdigits(operation, 24, 31);
     return c;
 }
-command Parser::SConstructor(unsigned int operation, unsigned int baseaddr) {
+command Parser::SSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
     c.instruction = command::S;
@@ -112,25 +119,33 @@ command Parser::SConstructor(unsigned int operation, unsigned int baseaddr) {
     padimm(c.imm, 12);
     return c;
 }
-command Parser::UConstructor(unsigned int operation, unsigned int baseaddr) {
-    //? TODO
+command Parser::USplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
     c.instruction = command::U;
     c.rd          = getdigits(operation, 6, 11);
-    c.funct3      = getdigits(operation, 11, 14);
-    c.rs1         = getdigits(operation, 14, 19);
-    c.imm         = 0xffffffff;
-    c.imm ^= ~getdigits(operation, 19, 31);
+    c.imm         = getdigits(operation, 11, 31) << 12;
     return c;
 }
-command Parser::BConstructor(unsigned int operation, unsigned int baseaddr) {
-    //?
+command Parser::BSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
     c.instruction = command::B;
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
     c.rs2         = getdigits(operation, 19, 24);
-    //TODO
+    c.imm         = getdigits(operation, 7, 11) << 1 | getdigits(operation, 24, 30) << 5 | getdigits(operation, 6, 7) << 11 | getdigits(operation, 24, 25) << 12;
+    padimm(c.imm, 13);
+    return c;
+}
+
+command Parser::JSplitter(unsigned int operation, unsigned int baseaddr) {
+    command c;
+    c.addr        = baseaddr;
+    c.instruction = command::J;
+    c.rd          = getdigits(operation, 6, 11);
+    c.funct3      = getdigits(operation, 11, 14);
+    c.imm         = (getdigits(operation, 20, 30) << 1) | (getdigits(operation, 19, 20) << 11) | (getdigits(operation, 11, 19) << 12) | (getdigits(operation, 30, 31) << 20);
+    padimm(c.imm, 20);
+    return c;
 }

@@ -67,10 +67,10 @@ TEST(ParserTest, getline_2) {
     EXPECT_EQ(t1.instruction, 0x1c072683);
 }
 
-TEST(ParserTest, RConstructor_XOR) {
+TEST(ParserTest, RSplitter_XOR) {
     Parser P("dataset/array_test2.data");
     //xor	a0,a0,a5
-    auto z = P.RConstructor(0x00f54533, 0x1357ABCD);
+    auto z = P.RSplitter(0x00f54533, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::R);
     EXPECT_EQ(z.rd, 0b01010) << z.rd;
@@ -80,10 +80,23 @@ TEST(ParserTest, RConstructor_XOR) {
     EXPECT_EQ(z.funct7, 0);
 }
 
-TEST(ParserTest, IConstructor_ADDI_1_Positive) {
+TEST(ParserTest, Splitter_1) {
+    Parser P("dataset/array_test2.data");
+    //xor	a0,a0,a5
+    auto z = P.Splitter(0x00f54533, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::R);
+    EXPECT_EQ(z.rd, 0b01010) << z.rd;
+    EXPECT_EQ(z.funct3, 0b100);
+    EXPECT_EQ(z.rs1, 0b01010);
+    EXPECT_EQ(z.rs2, 0b01111);
+    EXPECT_EQ(z.funct7, 0);
+}
+
+TEST(ParserTest, ISplitter_ADDI_1_Positive) {
     Parser P("dataset/array_test2.data");
     //addi	a0,a0,173 ADDI rd,rs1,imm
-    auto z = P.IConstructor(0x0ad50513, 0x1357ABCD);
+    auto z = P.ISplitter(0x0ad50513, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::I);
     EXPECT_EQ(z.rd, 0b01010);
@@ -92,10 +105,10 @@ TEST(ParserTest, IConstructor_ADDI_1_Positive) {
     EXPECT_EQ(z.imm, 0b00000000000000000000000010101101);
 }
 
-TEST(ParserTest, IConstructor_ADDI_2_Negative) {
+TEST(ParserTest, ISplitter_ADDI_2_Negative) {
     Parser P("dataset/array_test2.data");
     //addi	sp,sp,-32
-    auto z = P.IConstructor(0xfe010113, 0x1357ABCD);
+    auto z = P.ISplitter(0xfe010113, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::I);
     EXPECT_EQ(z.rd, 0b00010);
@@ -104,10 +117,34 @@ TEST(ParserTest, IConstructor_ADDI_2_Negative) {
     EXPECT_EQ(z.imm, 0b11111111111111111111111111100000);
 }
 
-TEST(ParserTest, IsConstructor_SRLI_1) {
+TEST(ParserTest, Splitter_2) {
+    Parser P("dataset/array_test2.data");
+    //addi	a0,a0,173 ADDI rd,rs1,imm
+    auto z = P.Splitter(0x0ad50513, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.rd, 0b01010);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b01010);
+    EXPECT_EQ(z.imm, 0b00000000000000000000000010101101);
+}
+
+TEST(ParserTest, Splitter_3) {
+    Parser P("dataset/array_test2.data");
+    //addi	sp,sp,-32
+    auto z = P.Splitter(0xfe010113, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.rd, 0b00010);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b00010);
+    EXPECT_EQ(z.imm, 0b11111111111111111111111111100000);
+}
+
+TEST(ParserTest, IsSplitter_SRLI_1) {
     Parser P("dataset/array_test2.data");
     //srli	a3,a3,0x1
-    auto z = P.IsConstructor(0x0016d693, 0x1357ABCD);
+    auto z = P.IsSplitter(0x0016d693, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::I);
     EXPECT_EQ(z.rd, 0b01101);
@@ -117,10 +154,10 @@ TEST(ParserTest, IsConstructor_SRLI_1) {
     EXPECT_EQ(z.funct7, 0);
 }
 
-TEST(ParserTest, IsConstructor_SRLI_2) {
+TEST(ParserTest, IsSplitter_SRLI_2) {
     Parser P("dataset/array_test2.data");
     //srli	a2,a2,0x1
-    auto z = P.IsConstructor(0x00165613, 0x1357ABCD);
+    auto z = P.IsSplitter(0x00165613, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::I);
     EXPECT_EQ(z.rd, 0b01100);
@@ -130,10 +167,36 @@ TEST(ParserTest, IsConstructor_SRLI_2) {
     EXPECT_EQ(z.funct7, 0);
 }
 
-TEST(ParserTest, SConstructor_1) {
+TEST(ParserTest, Splitter_4) {
+    Parser P("dataset/array_test2.data");
+    //srli	a3,a3,0x1
+    auto z = P.Splitter(0x0016d693, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.rd, 0b01101);
+    EXPECT_EQ(z.funct3, 0b101);
+    EXPECT_EQ(z.rs1, 0b01101);
+    EXPECT_EQ(z.imm, 0b1);
+    EXPECT_EQ(z.funct7, 0);
+}
+
+TEST(ParserTest, Splitter_5) {
+    Parser P("dataset/array_test2.data");
+    //srli	a2,a2,0x1
+    auto z = P.Splitter(0x00165613, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.rd, 0b01100);
+    EXPECT_EQ(z.funct3, 0b101);
+    EXPECT_EQ(z.rs1, 0b01100);
+    EXPECT_EQ(z.imm, 0b1);
+    EXPECT_EQ(z.funct7, 0);
+}
+
+TEST(ParserTest, SSplitter_1) {
     Parser P("dataset/array_test2.data");
     //sb	a2,4(a3)
-    auto z = P.SConstructor(0x00c68223, 0x1357ABCD);
+    auto z = P.SSplitter(0x00c68223, 0x1357ABCD);
     //0b 00000 01100 01101 000 00100 0100011;
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::S);
@@ -143,10 +206,10 @@ TEST(ParserTest, SConstructor_1) {
     EXPECT_EQ(z.imm, 0b00000000000000000000000000000100);
 }
 
-TEST(ParserTest, SConstructor_2) {
+TEST(ParserTest, SSplitter_2) {
     Parser P("dataset/array_test2.data");
     //sw	zero,416(s0)
-    auto z = P.SConstructor(0x1a042023, 0x1357ABCD);
+    auto z = P.SSplitter(0x1a042023, 0x1357ABCD);
     //0b 0001101 00000 01000 010 00000 0100011
     EXPECT_EQ(z.addr, 0x1357ABCD);
     EXPECT_EQ(z.instruction, command::S);
@@ -156,7 +219,104 @@ TEST(ParserTest, SConstructor_2) {
     EXPECT_EQ(z.imm, 0b00000000000000000000000110100000);
 }
 
+TEST(ParserTest, USplitter) {
+    Parser P("dataset/array_test2.data");
+    //sw	zero,416(s0)
+    auto z = P.USplitter(0x00020137, 0x1357ABCD);
+    //0b 100000 00010 0110111
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::U);
+    EXPECT_EQ(z.rd, 0b00010);
+    EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
+}
+
+TEST(ParserTest, Splitter_6) {
+    Parser P("dataset/array_test2.data");
+    //sb	a2,4(a3)
+    auto z = P.Splitter(0x00c68223, 0x1357ABCD);
+    //0b 00000 01100 01101 000 00100 0100011;
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::S);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b01101);
+    EXPECT_EQ(z.rs2, 0b01100);
+    EXPECT_EQ(z.imm, 0b00000000000000000000000000000100);
+}
+
+TEST(ParserTest, Splitter_7) {
+    Parser P("dataset/array_test2.data");
+    //sw	zero,416(s0)
+    auto z = P.SSplitter(0x1a042023, 0x1357ABCD);
+    //0b 0001101 00000 01000 010 00000 0100011
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::S);
+    EXPECT_EQ(z.funct3, 0b010);
+    EXPECT_EQ(z.rs1, 0b01000);
+    EXPECT_EQ(z.rs2, 0b00000);
+    EXPECT_EQ(z.imm, 0b00000000000000000000000110100000);
+}
+
+TEST(ParserTest, Splitter_8) {
+    Parser P("dataset/array_test2.data");
+    //sw	zero,416(s0)
+    auto z = P.Splitter(0x00020137, 0x1357ABCD);
+    //0b 100000 00010 0110111
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::U);
+    EXPECT_EQ(z.rd, 0b00010);
+    EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
+}
+
+TEST(ParserTest, BSplitter) {
+    Parser P("dataset/array_test2.data");
+    //beq	a4,a5,12e0
+    auto z = P.BSplitter(0xfef708e3, 0x1357ABCD);
+    //0b1111111 01111 01110 000 10001 1100011
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::B);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b01110);
+    EXPECT_EQ(z.rs2, 0b01111);
+    EXPECT_EQ(z.imm, 0b11111111111111111111111111110000);
+}
+
+TEST(ParserTest, Splitter_9) {
+    Parser P("dataset/array_test2.data");
+    //beq	a4,a5,12e0
+    auto z = P.Splitter(0xfef708e3, 0x1357ABCD);
+    //0b1111111 01111 01110 000 10001 1100011
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::B);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b01110);
+    EXPECT_EQ(z.rs2, 0b01111);
+    EXPECT_EQ(z.imm, 0b11111111111111111111111111110000);
+}
+
+TEST(ParserTest, JSplitter) {
+    Parser P("dataset/array_test2.data");
+    //jal	ra,1000
+    auto z = P.JSplitter(0xf99ff0ef, 0x1357ABCD);
+    //0b 1 1111001100 1 11111111 00001 1101111
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::J);
+    EXPECT_EQ(z.rd, 0b00001);
+    EXPECT_EQ(z.imm, 0b11111111111111111111111110011000);
+}
+
+TEST(ParserTest, Splitter_10) {
+    Parser P("dataset/array_test2.data");
+    //jal	ra,1000
+    auto z = P.Splitter(0xf99ff0ef, 0x1357ABCD);
+    //0b11111001100111111111 00001 1101111
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::J);
+    EXPECT_EQ(z.rd, 0b00001);
+    EXPECT_EQ(z.imm, 0b11111111111111111111111110011000);
+}
 int main(int argc, char** argv) {
+    Parser P("dataset/array_test2.data");
+
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
