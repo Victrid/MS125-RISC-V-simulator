@@ -91,6 +91,7 @@ TEST(ParserTest, IConstructor_ADDI_1_Positive) {
     EXPECT_EQ(z.rs1, 0b01010);
     EXPECT_EQ(z.imm, 0b00000000000000000000000010101101);
 }
+
 TEST(ParserTest, IConstructor_ADDI_2_Negative) {
     Parser P("dataset/array_test2.data");
     //addi	sp,sp,-32
@@ -108,24 +109,51 @@ TEST(ParserTest, IsConstructor_SRLI_1) {
     //srli	a3,a3,0x1
     auto z = P.IsConstructor(0x0016d693, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::Is);
+    EXPECT_EQ(z.instruction, command::I);
     EXPECT_EQ(z.rd, 0b01101);
     EXPECT_EQ(z.funct3, 0b101);
     EXPECT_EQ(z.rs1, 0b01101);
     EXPECT_EQ(z.imm, 0b1);
     EXPECT_EQ(z.funct7, 0);
 }
+
 TEST(ParserTest, IsConstructor_SRLI_2) {
     Parser P("dataset/array_test2.data");
     //srli	a2,a2,0x1
     auto z = P.IsConstructor(0x00165613, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::Is);
+    EXPECT_EQ(z.instruction, command::I);
     EXPECT_EQ(z.rd, 0b01100);
     EXPECT_EQ(z.funct3, 0b101);
     EXPECT_EQ(z.rs1, 0b01100);
     EXPECT_EQ(z.imm, 0b1);
     EXPECT_EQ(z.funct7, 0);
+}
+
+TEST(ParserTest, SConstructor_1) {
+    Parser P("dataset/array_test2.data");
+    //sb	a2,4(a3)
+    auto z = P.SConstructor(0x00c68223, 0x1357ABCD);
+    //0b 00000 01100 01101 000 00100 0100011;
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::S);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b01101);
+    EXPECT_EQ(z.rs2, 0b01100);
+    EXPECT_EQ(z.imm, 0b00000000000000000000000000000100);
+}
+
+TEST(ParserTest, SConstructor_2) {
+    Parser P("dataset/array_test2.data");
+    //sw	zero,416(s0)
+    auto z = P.SConstructor(0x1a042023, 0x1357ABCD);
+    //0b 0001101 00000 01000 010 00000 0100011
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::S);
+    EXPECT_EQ(z.funct3, 0b010);
+    EXPECT_EQ(z.rs1, 0b01000);
+    EXPECT_EQ(z.rs2, 0b00000);
+    EXPECT_EQ(z.imm, 0b00000000000000000000000110100000);
 }
 
 int main(int argc, char** argv) {

@@ -9,10 +9,8 @@ struct mempair {
 
 struct command {
     taddr addr;
-    //Is is separated from I for slli srli and srai.
     enum { R,
            I,
-           Is,
            S,
            U,
            J,

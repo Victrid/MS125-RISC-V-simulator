@@ -58,6 +58,9 @@ command Parser::Constructor(unsigned int operation, unsigned int baseaddr) {
     case 0b00000:
         return IConstructor(operation, baseaddr);
         break;
+    case 0b01000:
+        return SConstructor(operation, baseaddr);
+        break;
     }
 }
 taddr Parser::getdigits(taddr content, int l, int r) {
@@ -90,7 +93,7 @@ command Parser::IConstructor(unsigned int operation, unsigned int baseaddr) {
 command Parser::IsConstructor(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::Is;
+    c.instruction = command::I;
     c.rd          = getdigits(operation, 6, 11);
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
@@ -105,7 +108,8 @@ command Parser::SConstructor(unsigned int operation, unsigned int baseaddr) {
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
     c.rs2         = getdigits(operation, 19, 24);
-    c.imm         = (getdigits(operation, 24, 31) << 5) + getdigits(operation, 6, 11);
+    c.imm         = (getdigits(operation, 24, 31) << 5) | getdigits(operation, 6, 11);
+    padimm(c.imm, 12);
     return c;
 }
 command Parser::UConstructor(unsigned int operation, unsigned int baseaddr) {
