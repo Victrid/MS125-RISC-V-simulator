@@ -4,6 +4,26 @@
 #include <iostream>
 using namespace std;
 
+TEST(ParserTest, padimm) {
+    Parser P("dataset/array_test1.data");
+    taddr t1  = 0b00000000000000000000001000101101,
+          t1a = 0b11111111111111111111111000101101,
+          t2  = 0b00000000000000000011010001001101,
+          t2a = 0b00000000000000000011010001001101,
+          t3  = 0b11111111111111111111111111111111,
+          t3a = 0b11111111111111111111111111111111,
+          t4  = 0b01111111111111111111111111111111,
+          t4a = 0b11111111111111111111111111111111;
+    P.padimm(t1, 10);
+    EXPECT_EQ(t1, t1a);
+    P.padimm(t2, 15);
+    EXPECT_EQ(t2, t2a);
+    P.padimm(t3, 32);
+    EXPECT_EQ(t3, t3a);
+    P.padimm(t4, 31);
+    EXPECT_EQ(t4, t4a);
+}
+
 TEST(ParserTest, getline_1) {
     Parser P("dataset/array_test1.data");
     auto t1 = P.getline();
@@ -60,7 +80,7 @@ TEST(ParserTest, RConstructor_XOR) {
     EXPECT_EQ(z.funct7, 0);
 }
 
-TEST(ParserTest, IConstructor_ADDI) {
+TEST(ParserTest, IConstructor_ADDI_1_Positive) {
     Parser P("dataset/array_test2.data");
     //addi	a0,a0,173 ADDI rd,rs1,imm
     auto z = P.IConstructor(0x0ad50513, 0x1357ABCD);
@@ -69,8 +89,20 @@ TEST(ParserTest, IConstructor_ADDI) {
     EXPECT_EQ(z.rd, 0b01010);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b01010);
-    EXPECT_EQ(z.imm, 0b000010101101);
+    EXPECT_EQ(z.imm, 0b00000000000000000000000010101101);
 }
+TEST(ParserTest, IConstructor_ADDI_2_Negative) {
+    Parser P("dataset/array_test2.data");
+    //addi	sp,sp,-32
+    auto z = P.IConstructor(0xfe010113, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.rd, 0b00010);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b00010);
+    EXPECT_EQ(z.imm, 0b11111111111111111111111111100000);
+}
+
 TEST(ParserTest, IsConstructor_SRLI_1) {
     Parser P("dataset/array_test2.data");
     //srli	a3,a3,0x1
@@ -95,6 +127,7 @@ TEST(ParserTest, IsConstructor_SRLI_2) {
     EXPECT_EQ(z.imm, 0b1);
     EXPECT_EQ(z.funct7, 0);
 }
+
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

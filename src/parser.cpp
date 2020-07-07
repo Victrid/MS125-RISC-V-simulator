@@ -13,6 +13,13 @@ int Parser::hextoint(char c) {
         return c - 'A' + 10;
 }
 
+void Parser::padimm(taddr& imm, int digit) {
+    if (getdigits(imm, digit - 2, digit - 1)) {
+        imm = (0xFFFFFFFF << digit) | imm;
+    }
+    return;
+}
+
 mempair Parser::getline() {
     (*file) >> inputline;
     if (inputline[0] == '@') {
@@ -77,6 +84,7 @@ command Parser::IConstructor(unsigned int operation, unsigned int baseaddr) {
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
     c.imm         = getdigits(operation, 19, 31);
+    padimm(c.imm, 12);
     return c;
 }
 command Parser::IsConstructor(unsigned int operation, unsigned int baseaddr) {
