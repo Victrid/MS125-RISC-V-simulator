@@ -9,6 +9,12 @@ void Parser::padimm(taddr& imm, int digit) {
     return;
 }
 
+int Parser::fint(const taddr& t) {
+    int ret;
+    memcpy(&ret, &t, sizeof(taddr));
+    return ret;
+}
+
 command Parser::Splitter(unsigned int operation, unsigned int baseaddr) {
     taddr opcode = (operation - (operation >> 7 << 7)) >> 2;
     switch (opcode) {
