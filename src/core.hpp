@@ -14,13 +14,14 @@ public:
     int round;
     taddr loadmem;
     command C;
+    int retval;
     int fmemory;
-    struct memory_mod {
+    struct {
         taddr addr;
         taddr bits;
         taddr content;
     } mmod;
-    struct memory_req {
+    struct {
         taddr addr;
         taddr bits;
         taddr regp;
@@ -142,7 +143,7 @@ public:
                     break;
                 case 0b101: //LHU
                     mreq.addr = reg[C.rs1] + P.fint(C.imm);
-                    mreq.bits = 8;
+                    mreq.bits = 16;
                     mreq.regp = C.rd;
                     mreq.sign = false;
                     break;
@@ -151,6 +152,11 @@ public:
             case command::I:
                 switch (C.funct3) {
                 case 0b000: //ADDI
+                    if ((C.rd == 0b01010) && (C.rs1 = 0b00000) && C.imm == 255) {
+                        //TERM
+                        retval = P.fint(reg[0b01010]);
+                        return -1;
+                    }
                     reg[C.rd] = P.ftaddr(P.fint(reg[C.rs1]) + P.fint(C.imm));
                     break;
                 case 0b010: //SLTI
@@ -228,8 +234,51 @@ public:
         case 3:
         case 4:
         case 5: //MEM
-        //TODO
+            if (!fmemory)
+                break;
+            if (fmemory == 1) {
+                taddr mask = M.get(mmod.addr);
+                switch (mmod.bits) {
+                case 8:
+                    mask         = mask & 0xFFF0;
+                    mmod.content = mmod.content & 0x000F;
+                    break;
+                case 16:
+                    mask         = mask & 0xFF00;
+                    mmod.content = mmod.content & 0x00FF;
+                    break;
+                case 32:
+                    mask         = mask & 0x0000;
+                    mmod.content = mmod.content & 0xFFFF;
+                    break;
+                }
+                M.get(mmod.addr) = mask | mmod.content;
+                fmemory          = 0;
+            } else {
+                taddr addr;
+                taddr bits;
+                taddr regp;
+                bool sign;
+                taddr mask = M.get(mreq.addr);
+                switch (mmod.bits) {
+                case 8:
+                    mask = P.getdigits(mask, -1, 7);
+                    if (sign)
+                        P.padimm(mask, 8);
+                    break;
+                case 16:
+                    mask = P.getdigits(mask, -1, 7);
+                    if (sign)
+                        P.padimm(mask, 8);
+                    break;
+                case 32:
+                    break;
+                }
+                reg[regp] = mask;
+                fmemory   = 0;
+            }
         case 6: //WB
+            reg[0] = 0;
             break;
         }
         round++;
