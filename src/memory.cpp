@@ -35,7 +35,7 @@ mempair loader::getline() {
     }
     (*file) >> (inputline + 2) >> (inputline + 4) >> (inputline + 6);
     unsigned int operation = 0;
-    for (int i = 3; i >= 0; i--) {
+    for (int i = 0; i < 4; i++) {
         operation <<= 8;
         operation += (hextoint(inputline[i << 1]) << 4) + hextoint(inputline[i << 1 | 1]);
     }

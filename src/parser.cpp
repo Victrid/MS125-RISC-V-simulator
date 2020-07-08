@@ -22,6 +22,7 @@ taddr Parser::ftaddr(const int& t) {
 }
 
 command Parser::Splitter(unsigned int operation, unsigned int baseaddr) {
+    operation    = rearrange(operation);
     taddr opcode = (operation - (operation >> 7 << 7)) >> 2;
     switch (opcode) {
     case 0b01100:
@@ -423,6 +424,10 @@ ostream& Parser::displayer(command& z, ostream& os) {
     }
     }
     return os;
+};
+
+taddr Parser::rearrange(const taddr& t) {
+    return getdigits(t, -1, 7) << 24 | getdigits(t, 7, 15) << 16 | getdigits(t, 15, 23) << 8 | getdigits(t, 23, 31);
 };
 
 // void showfile() {

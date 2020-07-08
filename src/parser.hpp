@@ -14,6 +14,7 @@ public:
     static void padimm(taddr& imm, int digit);
     static int fint(const taddr& t);
     static taddr ftaddr(const int& t);
+    static taddr rearrange(const taddr& t);
     static taddr getdigits(taddr content, int low, int high);
     static command Splitter(taddr operation, taddr baseaddr);
     static command RSplitter(taddr operation, taddr baseaddr);
