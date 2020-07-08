@@ -394,7 +394,7 @@ TEST(CoreTest, TickTest_Immidiates) {
     C.cycle();
     EXPECT_EQ(C.reg[2], 0xFFFFF800);
     C.cycle();
-    EXPECT_EQ(C.reg[2], 0xFFFFF012);
+    EXPECT_EQ(C.reg[2], 0xFFFFF044);
 }
 
 int main(int argc, char** argv) {
