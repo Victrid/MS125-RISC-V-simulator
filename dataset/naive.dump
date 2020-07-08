@@ -7,9 +7,9 @@ Disassembly of section .rom:
 00000000 <.rom>:
    0:	00020137          	lui	sp,0x20
    4:	040010ef          	jal	ra,1044 <main>
-   8:	0ff00613          	li	a2,255
+   8:	0ff00513          	li	a0,255
    c:	000306b7          	lui	a3,0x30
-  10:	00c68223          	sb	a2,4(a3) # 30004 <__heap_start+0x2e004>
+  10:	00a68223          	sb	a0,4(a3) # 30004 <__heap_start+0x2e004>
   14:	ff9ff06f          	j	c <printInt-0xff4>
 
 Disassembly of section .text:
@@ -57,21 +57,6 @@ Disassembly of section .sbss:
 0000106c <judgeResult>:
     106c:	0000                	unimp
 	...
-
-Disassembly of section .riscv.attributes:
-
-00000000 <.riscv.attributes>:
-   0:	1941                	addi	s2,s2,-16
-   2:	0000                	unimp
-   4:	7200                	flw	fs0,32(a2)
-   6:	7369                	lui	t1,0xffffa
-   8:	01007663          	bgeu	zero,a6,14 <printInt-0xfec>
-   c:	0000000f          	fence	unknown,unknown
-  10:	7205                	lui	tp,0xfffe1
-  12:	3376                	fld	ft6,376(sp)
-  14:	6932                	flw	fs2,12(sp)
-  16:	7032                	flw	ft0,44(sp)
-  18:	0030                	addi	a2,sp,8
 
 Disassembly of section .comment:
 
