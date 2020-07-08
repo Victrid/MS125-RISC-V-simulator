@@ -1,0 +1,23 @@
+# This is set to test register-register commands.
+addi x1, zero, -1   #x1=0xFFFFFFFF
+addi x2,x0,0x00F    #x2=0x0000000F
+add x3,x1,x2        #x3=0x0000000E
+add x0,x1,x2        #x0=0x00000000
+sub x3,x1,x2        #x3=0xFFFFFFF0
+
+sub x3,x2,x1        #x3=0x00000010
+slt x3,x1,x2        #x3=0x00000001
+sltu x3,x1,x2       #x3=0x00000000
+and x3,x1,x2        #x3=0x0000000F
+sub x4,x1,x2        #x4=0xFFFFFFF0
+
+add x5,x1,x2        #x5=0x0000000E
+or x3,x4,x5         #x3=0xFFFFFFFE
+xor x3,x3,x1        #x3=0x00000001
+sll x3,x3,x1        #x3=0x80000000
+srl x3,x3,x2        #x3=0x00010000
+
+srl x3,x1,x2        #x3=0x0001FFFF
+addi x3,x1,-0xF     #x3=0xFFFFFFF0
+addi x2,x0,2        #x3=0x00000002
+sra x3,x3,x2        #x3=0xFFFFFFFC

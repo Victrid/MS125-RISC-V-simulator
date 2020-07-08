@@ -16,4 +16,9 @@ build:
 test:
   stage: test
   script:
-    - make unit_test
+    - make unit_test_1
+
+test2:
+  stage: test
+  script:
+    - make unit_test_2

@@ -59,6 +59,61 @@ TEST(CoreTest, TickTest_Immidiates) {
     EXPECT_EQ(C.reg[2], 0xFFFFF044);
 }
 
+TEST(CoreTest, TickTest_Registers) {
+    //This is aimed to test
+    //commands interacting with immidiates.
+    core_session C("dataset/basic-testset/test-2.data");
+    C.cycle();
+    EXPECT_EQ(C.reg[1], 0xFFFFFFFF);
+    C.cycle();
+    EXPECT_EQ(C.reg[2], 0x0000000F);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x0000000E);
+    EXPECT_EQ(C.reg[1], 0xFFFFFFFF);
+    EXPECT_EQ(C.reg[2], 0x0000000F);
+    C.cycle();
+    EXPECT_EQ(C.reg[0], 0x00000000);
+    EXPECT_EQ(C.reg[1], 0xFFFFFFFF);
+    EXPECT_EQ(C.reg[2], 0x0000000F);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0xFFFFFFF0);
+    EXPECT_EQ(C.reg[1], 0xFFFFFFFF);
+    EXPECT_EQ(C.reg[2], 0x0000000F);
+
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x00000010);
+    EXPECT_EQ(C.reg[1], 0xFFFFFFFF);
+    EXPECT_EQ(C.reg[2], 0x0000000F);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x00000001);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x00000000);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x0000000F);
+    C.cycle();
+    EXPECT_EQ(C.reg[4], 0xFFFFFFF0);
+
+    C.cycle();
+    EXPECT_EQ(C.reg[5], 0x0000000E);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0xFFFFFFFE);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x00000001);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x80000000);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x00010000);
+
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0x0001FFFF);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0xFFFFFFF0);
+    C.cycle();
+    EXPECT_EQ(C.reg[2], 0x00000002);
+    C.cycle();
+    EXPECT_EQ(C.reg[3], 0xFFFFFFFC);
+}
+
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
