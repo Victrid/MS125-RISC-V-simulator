@@ -15,6 +15,12 @@ int Parser::fint(const taddr& t) {
     return ret;
 }
 
+taddr Parser::ftaddr(const int& t) {
+    taddr ret;
+    memcpy(&ret, &t, sizeof(taddr));
+    return ret;
+}
+
 command Parser::Splitter(unsigned int operation, unsigned int baseaddr) {
     taddr opcode = (operation - (operation >> 7 << 7)) >> 2;
     switch (opcode) {
