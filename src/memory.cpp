@@ -2,14 +2,21 @@
 
 int memory::load(taddr address, taddr c) {
     if (page.find(address / 0x1000) == page.end()) {
-        page.insert(pair<taddr, taddr*>(address / 0x1000, new taddr[0x1000]));
+        page.insert(pair<taddr, taddr*>(address / 0x1000, new taddr[0x1000]()));
     }
     page[address / 0x1000][address % 0x1000] = c;
     return 0;
 }
 
 taddr& memory::get(taddr address) {
+    pagetest(address);
     return page[address / 0x1000][address % 0x1000];
+}
+
+void memory::pagetest(taddr address) {
+    if (page.find(address / 0x1000) == page.end()) {
+        page.insert(pair<taddr, taddr*>(address / 0x1000, new taddr[0x1000]()));
+    }
 }
 
 int memory::memload(const char* c) {

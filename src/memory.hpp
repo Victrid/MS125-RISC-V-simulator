@@ -22,6 +22,7 @@ public:
     map<taddr, taddr*> page;
     int load(taddr address, taddr c);
     taddr& get(taddr address);
+    void pagetest(taddr address);
     int memload(const char* c);
 
 public:

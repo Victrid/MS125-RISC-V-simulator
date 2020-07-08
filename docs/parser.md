@@ -47,3 +47,8 @@ The location of instruction bits in the U and J format immediates is chosen to m
 [Stack Overflow](https://stackoverflow.com/questions/42298544/what-is-stored-in-the-shift-amount-field-of-r-type-instructions): shamt stands for shift amount which will contain the number by which you want you shift, in `sll $s0,$so,2`, the shamt will be 2 in binary: `00010`
 
 It can (and should be treated) as some special immediate. [REF](#rf1) immediates padding
+
+## Some notes
+
+SLTIU: The immediate is first sign-extended to 32 bits then treated as an unsigned number.
+
