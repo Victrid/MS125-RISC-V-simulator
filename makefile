@@ -1,3 +1,4 @@
+.PHONY: test
 test: src/test1.cpp src/test2.cpp src/core.cpp src/parser.cpp src/memory.cpp
 	g++ -o test1 src/test1.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
 	g++ -o test2 src/test2.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
