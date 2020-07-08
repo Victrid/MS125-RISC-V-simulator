@@ -1,10 +1,13 @@
-test: src/test.cpp src/parser.cpp
-	g++ -o test src/test.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
+test: src/test1.cpp src/test2.cpp src/core.cpp src/parser.cpp src/memory.cpp
+	g++ -o test1 src/test1.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
+	g++ -o test1 src/test1.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
 
 .PHONY: unit_test
 unit_test: clean test
-	./test
+	./test1
+	./test2
 
 .PHONY: clean
 clean:
-	rm -rf ./test
+	rm -rf ./test1
+	rm -rf ./test2

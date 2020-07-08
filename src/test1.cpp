@@ -7,24 +7,6 @@
 #include <sstream>
 using namespace std;
 Parser P;
-TEST(ParserTest, padimm) {
-    taddr t1  = 0b00000000000000000000001000101101,
-          t1a = 0b11111111111111111111111000101101,
-          t2  = 0b00000000000000000011010001001101,
-          t2a = 0b00000000000000000011010001001101,
-          t3  = 0b11111111111111111111111111111111,
-          t3a = 0b11111111111111111111111111111111,
-          t4  = 0b01111111111111111111111111111111,
-          t4a = 0b11111111111111111111111111111111;
-    P.padimm(t1, 10);
-    EXPECT_EQ(t1, t1a);
-    P.padimm(t2, 15);
-    EXPECT_EQ(t2, t2a);
-    P.padimm(t3, 32);
-    EXPECT_EQ(t3, t3a);
-    P.padimm(t4, 31);
-    EXPECT_EQ(t4, t4a);
-}
 
 TEST(LoaderTest, getline_1) {
     loader l("dataset/array_test1.data");
@@ -45,28 +27,28 @@ TEST(LoaderTest, getline_1) {
 
 TEST(LoaderTest, getline_2) {
     loader P("dataset/array_test2.data");
-    P.getline();
-    P.getline();
-    P.getline();
-    P.getline();
-    P.getline();
-    P.getline();
-    P.getline();
-    P.getline();
-    P.getline();
     auto t1 = P.getline();
+    for (int i = 0; i < 9; i++)
+        t1 = P.getline();
     EXPECT_EQ(t1.address, 0x0000100c);
     EXPECT_EQ(t1.instruction, 0x1305d50a);
     t1 = P.getline();
     EXPECT_EQ(t1.address, 0x00001010);
     EXPECT_EQ(t1.instruction, 0x2320a71c);
-    P.getline();
-    P.getline();
-    P.getline();
-    P.getline();
-    t1 = P.getline();
+    for (int i = 0; i < 5; i++)
+        t1 = P.getline();
     EXPECT_EQ(t1.address, 0x00001024);
     EXPECT_EQ(t1.instruction, 0x8326071c);
+}
+
+TEST(ParserTest, padimm) {
+    taddr test[] = {0x08008241, 0x0000344D, 0xFFFFFFFF, 0x7FFFFFFF},
+          ans[]  = {0xFFFFFE41, 0x344D, 0xFFFFFFFF, 0xFFFFFFFF},
+          pad[]  = {10, 15, 32, 31};
+    for (int i = 0; i < 4; i++) {
+        P.padimm(test[i], pad[i]);
+        EXPECT_EQ(test[i], ans[i]);
+    }
 }
 
 TEST(ParserTest, rearrange) {
@@ -346,55 +328,6 @@ TEST(MemTest, MemLoad_get_test) {
     EXPECT_EQ(t.rs1, z.rs1);
     EXPECT_EQ(t.rs2, z.rs2);
     EXPECT_EQ(t.rd, z.rd);
-}
-
-TEST(CoreTest, TickTest_Immidiates) {
-    core_session C("dataset/basic-testset/test-1.data");
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00020000);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00020020);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x0002001D);
-    C.cycle();
-    EXPECT_EQ(C.reg[3], 0x00000210);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00000000);
-    EXPECT_EQ(C.reg[3], 0x00000210);
-
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00000000);
-    EXPECT_EQ(C.reg[3], 0x00000210);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00000001);
-    EXPECT_EQ(C.reg[3], 0x00000210);
-    C.cycle();
-    EXPECT_EQ(C.reg[5], 0xFFFFF000);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00000001);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00000000);
-
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00000001);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x00000000);
-    EXPECT_EQ(C.reg[5], 0xFFFFF000);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0xFFFFF00F);
-    EXPECT_EQ(C.reg[5], 0xFFFFF000);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0xFFFFF0FF);
-    EXPECT_EQ(C.reg[5], 0xFFFFF000);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0xFFFFE000);
-
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0x7FFFF800);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0xFFFFF800);
-    C.cycle();
-    EXPECT_EQ(C.reg[2], 0xFFFFF044);
 }
 
 int main(int argc, char** argv) {
