@@ -114,6 +114,18 @@ TEST(ParserTest, IsSplitter_SRLI_2) {
     EXPECT_EQ(z.funct7, 0);
 }
 
+TEST(ParserTest, IlSplitter) {
+    //srli	a2,a2,0x1
+    //0b0 00010 000 01101 0000011
+    auto z = P.IlSplitter(0x00010683, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::Il);
+    EXPECT_EQ(z.rd, 0b01101);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b00010);
+    EXPECT_EQ(z.imm, 0b0);
+}
+
 TEST(ParserTest, SSplitter_1) {
     //sb	a2,4(a3)
     auto z = P.SSplitter(0x00c68223, 0x1357ABCD);
@@ -302,6 +314,16 @@ TEST(ParserTest, Splitter_11) {
     EXPECT_EQ(z.instruction, command::Ua);
     EXPECT_EQ(z.rd, 0b00010);
     EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
+}
+
+TEST(ParserTest, Splitter_12) {
+    auto z = P.Splitter(0x83060100, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::Il);
+    EXPECT_EQ(z.rd, 0b01101);
+    EXPECT_EQ(z.funct3, 0b000);
+    EXPECT_EQ(z.rs1, 0b00010);
+    EXPECT_EQ(z.imm, 0b0);
 }
 
 TEST(MemTest, Loadtest) {
