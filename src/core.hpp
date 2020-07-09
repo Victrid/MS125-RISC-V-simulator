@@ -31,6 +31,7 @@ public:
     ostream& printmem(ostream& os);
     int tick();
     int cycle();
+    int run();
     //fetch
 };
 

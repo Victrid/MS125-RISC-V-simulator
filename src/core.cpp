@@ -132,7 +132,7 @@ int core_session::tick() {
         case command::I:
             switch (C.funct3) {
             case 0b000: //ADDI
-                if ((C.rd == 0b01010) && (C.rs1 = 0b00000) && C.imm == 255) {
+                if ((C.rd == 10) && (C.rs1 == 0) && C.imm == 255) {
                     //TERM
                     retval = reg[0b01010] & 255u;
                     return -1;
@@ -301,5 +301,12 @@ int core_session::cycle() {
     int tickret = 0;
     for (int i = 0; i < 7 && !tickret; i++)
         tickret = tick();
-    return 0;
+    return tickret;
+}
+
+int core_session::run() {
+    int tickret = 0;
+    while (!tickret)
+        tickret = cycle();
+    return retval;
 }

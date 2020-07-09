@@ -166,6 +166,11 @@ TEST(CoreTest, MemoryReadTest) {
     EXPECT_EQ(C.reg[23], 0xDEADC0DE);
 }
 
+TEST(CoreTest, ReturnTest_1) {
+    core_session C("dataset/sample.data");
+    EXPECT_EQ(C.run(), 94);
+};
+
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
