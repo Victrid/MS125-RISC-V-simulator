@@ -177,17 +177,35 @@ TEST(CoreTest, JumpTest) {
 
 TEST(CoreTest, BranchTest_1_BEQ) {
     core_session C("dataset/basic-testset/test-8.data");
-    taddr pc[] = {0x0,0x4,0x8,0x10,0x14,0x18,0xc};
+    taddr pc[] = {0x0, 0x4, 0x8, 0x10, 0x14, 0x18, 0xc};
     for (int i = 0; i < 7; i++) {
         EXPECT_EQ(C.pc, pc[i]);
         C.cycle();
     }
 }
 
-TEST(CoreTest, BranchTest_1_BNE) {
+TEST(CoreTest, BranchTest_2_BNE) {
     core_session C("dataset/basic-testset/test-9.data");
-    taddr pc[] = {0x0,0x4,0x8,0x10,0x14,0x18,0x1c};
+    taddr pc[] = {0x0, 0x4, 0x8, 0x10, 0x14, 0x18, 0x1c};
     for (int i = 0; i < 7; i++) {
+        EXPECT_EQ(C.pc, pc[i]);
+        C.cycle();
+    }
+}
+
+TEST(CoreTest, BranchTest_3_BLT_U) {
+    core_session C("dataset/basic-testset/test-A.data");
+    taddr pc[] = {0x0, 0x4, 0x8, 0x10, 0x14, 0x18, 0x1c, 0x20, 0x24, 0x0c};
+    for (int i = 0; i < 10; i++) {
+        EXPECT_EQ(C.pc, pc[i]);
+        C.cycle();
+    }
+}
+
+TEST(CoreTest, BranchTest_4_BGE_U) {
+    core_session C("dataset/basic-testset/test-B.data");
+    taddr pc[] = {0x0, 0x4, 0x8, 0x10, 0x14, 0x18, 0x20, 0x28, 0x2c, 0x0c};
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(C.pc, pc[i]);
         C.cycle();
     }

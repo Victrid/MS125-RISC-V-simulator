@@ -1,0 +1,13 @@
+li x1,1
+li x2,-1
+blt x2,x1,LB1L
+LBL:
+nop
+LB1L:
+bltu x2,x1,LBL
+LBAA:
+addi x2,x2,2
+blt x1,x2,LBL
+bltu x2,x1,LBL
+blt x1,x0,LBL
+bltu x0,x2,LBL

@@ -1,0 +1,17 @@
+li x1,1
+li x2,-1
+bge x1,x2,LB1L
+LBL:
+nop
+LB1L:
+bgeu x1,x2,LBL
+LBAA:
+addi x2,x2,2
+bge x1,x2,LBBB
+j LBL
+LBBB:
+bgeu x2,x1,LBCC
+j LBL
+LBCC:
+bge x0,x1,LBL
+bgeu x2,x0,LBL
