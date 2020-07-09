@@ -17,6 +17,7 @@ G(gcd, 178);
 G(lvalue2, 175);
 G(manyarguments, 40);
 G(naive, 94);
+// G(qsort, 105);
 //TIME
 // G(bulgarian, 159);
 // G(expr, 58);
@@ -34,4 +35,6 @@ G(naive, 94);
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
+    // core_session C("dataset/qsort.data");
+    // C.debug_run();
 }

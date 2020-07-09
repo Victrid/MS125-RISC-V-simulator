@@ -32,6 +32,7 @@ public:
     int tick();
     int cycle();
     int run();
+    int debug_run();
     //fetch
 };
 

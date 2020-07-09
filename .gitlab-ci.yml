@@ -27,3 +27,9 @@ test3:
   stage: test
   script:
     - make unit_test_3
+    
+test_coverage:
+  stage: test
+  script:
+    - make test_gcovr
+    - gcovr -r .

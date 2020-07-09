@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include <stdio.h>
 core_session::core_session(const char* c) : M(), P() {
     M.memload(c);
     pc = 0;
@@ -308,5 +309,23 @@ int core_session::run() {
     int tickret = 0;
     while (!tickret)
         tickret = cycle();
+    return retval;
+}
+
+int core_session::debug_run() {
+    int tickret    = 0;
+    char c         = '\0';
+    unsigned vvred = 0;
+    while (!tickret) {
+        tickret = cycle();
+        printmem(cout);
+        if (!vvred) {
+            vvred--;
+        } else {
+            c = getchar();
+        }
+        if (c == '3')
+            vvred = 1000;
+    }
     return retval;
 }
