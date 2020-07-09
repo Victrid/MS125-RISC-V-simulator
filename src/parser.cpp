@@ -127,7 +127,7 @@ command Parser::BSplitter(unsigned int operation, unsigned int baseaddr) {
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
     c.rs2         = getdigits(operation, 19, 24);
-    c.imm         = getdigits(operation, 7, 11) << 1 | getdigits(operation, 24, 30) << 5 | getdigits(operation, 6, 7) << 11 | getdigits(operation, 24, 25) << 12;
+    c.imm         = getdigits(operation, 7, 11) << 1 | getdigits(operation, 24, 30) << 5 | getdigits(operation, 6, 7) << 11 | getdigits(operation, 30, 31) << 12;
     padimm(c.imm, 13);
     return c;
 }

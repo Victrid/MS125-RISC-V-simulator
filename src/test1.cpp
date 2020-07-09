@@ -182,6 +182,18 @@ TEST(ParserTest, BSplitter) {
     EXPECT_EQ(z.imm, 0b11111111111111111111111111110000);
 }
 
+TEST(ParserTest, BSplitter_2) {
+    //bge	a4,a3,7c
+    auto z = P.BSplitter(0x06d75e63, 0x1357ABCD);
+    //0b1111111 01111 01110 000 10001 1100011
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, command::B);
+    EXPECT_EQ(z.funct3, 0b101);
+    EXPECT_EQ(z.rs1, 0b01110);
+    EXPECT_EQ(z.rs2, 0b01101);
+    EXPECT_EQ(z.imm, 0b1111100);
+}
+
 TEST(ParserTest, JSplitter) {
     //jal	ra,1000
     auto z = P.JSplitter(0xf99ff0ef, 0x1357ABCD);
