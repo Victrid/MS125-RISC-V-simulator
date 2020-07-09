@@ -1,0 +1,8 @@
+bne x0,x0,8
+beq x0,x0,12
+nop
+addi x1,x0,3
+bne x1,x1,-8
+bne x0,x1,8
+nop
+add x1,x0,3

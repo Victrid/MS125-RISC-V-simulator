@@ -1,0 +1,8 @@
+# Test memorystore
+    li sp,0x00001000
+    li a1,0xDEADBEEF
+    li a2,0xFFFFFFFF
+	sw	a1,0(sp)
+	sh  a1,32(sp)
+	sb  a1,64(sp)
+	sb  a2,0(sp)
