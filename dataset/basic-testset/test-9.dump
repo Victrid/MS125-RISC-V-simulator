@@ -1,0 +1,11 @@
+li x1,1
+li x2,-1
+bne x1,x2,LB1L
+LBL:
+nop
+LB1L:
+bne x0,x0,LBL
+LBAA:
+addi x2,x2,2
+bne x1,x2,LBAA
+j LBL

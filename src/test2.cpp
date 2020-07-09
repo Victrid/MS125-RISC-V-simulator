@@ -166,6 +166,33 @@ TEST(CoreTest, MemoryReadTest) {
     EXPECT_EQ(C.reg[23], 0xDEADC0DE);
 }
 
+TEST(CoreTest, JumpTest) {
+    core_session C("dataset/basic-testset/test-7.data");
+    taddr pc[] = {0, 0x10, 0x14, 0x4, 0xC, 0x8, 0x18};
+    for (int i = 0; i < 7; i++) {
+        EXPECT_EQ(C.pc, pc[i]);
+        C.cycle();
+    }
+}
+
+TEST(CoreTest, BranchTest_1_BEQ) {
+    core_session C("dataset/basic-testset/test-8.data");
+    taddr pc[] = {0x0,0x4,0x8,0x10,0x14,0x18,0xc};
+    for (int i = 0; i < 7; i++) {
+        EXPECT_EQ(C.pc, pc[i]);
+        C.cycle();
+    }
+}
+
+TEST(CoreTest, BranchTest_1_BNE) {
+    core_session C("dataset/basic-testset/test-9.data");
+    taddr pc[] = {0x0,0x4,0x8,0x10,0x14,0x18,0x1c};
+    for (int i = 0; i < 7; i++) {
+        EXPECT_EQ(C.pc, pc[i]);
+        C.cycle();
+    }
+}
+
 TEST(CoreTest, ReturnTest_1) {
     core_session C("dataset/sample.data");
     EXPECT_EQ(C.run(), 94);

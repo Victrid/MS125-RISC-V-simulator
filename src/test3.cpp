@@ -18,20 +18,22 @@ G(lvalue2, 175);
 G(manyarguments, 40);
 G(naive, 94);
 //TIME
-G(bulgarian, 159);
-G(expr, 58);
-G(magic, 106);
-G(multiarray, 115);
-G(pi, 137);
-G(queens, 171);
-G(statement_test, 50);
-G(tak, 186);
+// G(bulgarian, 159);
+// G(expr, 58);
+// G(magic, 106);
+// G(multiarray, 115);
+// G(pi, 137);
+// G(queens, 171);
+// G(statement_test, 50);
+// G(tak, 186);
 //ERROR
 // G(qsort, 105);
 // G(hanoi, 20);
 // G(superloop, 134);
 
 int main(int argc, char** argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    // testing::InitGoogleTest(&argc, argv);
+    // return RUN_ALL_TESTS();
+    core_session C("dataset/bulgarian.data");
+    C.run();
 }

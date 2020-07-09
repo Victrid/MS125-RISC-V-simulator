@@ -1,0 +1,10 @@
+li x1,1
+li x2,-1
+beq x0,x0,LB1L
+LBL:
+nop
+LB1L:
+beq x1,x2,LBL
+LBAA:
+addi x2,x2,2
+beq x1,x2,LBL
