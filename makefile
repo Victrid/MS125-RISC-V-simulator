@@ -17,5 +17,5 @@ unit_test_2: clean test_2
 
 .PHONY: clean
 clean:
-	rm -rf ./test1
-	rm -rf ./test2
+	rm -rf ./test_1
+	rm -rf ./test_2

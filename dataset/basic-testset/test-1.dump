@@ -1,9 +1,9 @@
 # For testing immediates processing
 
 lui sp,0x020        # sp=0x00020000
-addi sp sp 0x20     # sp=0x00020020
-addi sp sp -3       # sp=0x0002001D
-addi x3 x3 0x210    # x3=0x00000210
+addi sp,sp,0x20     # sp=0x00020020
+addi sp,sp,-3       # sp=0x0002001D
+addi x3,x3,0x210    # x3=0x00000210
 slti x2,x3,0x20F    # x2=0x00000000
 
 slti x2,x3,0x210    # x2=0x00000000
@@ -12,7 +12,7 @@ lui x5,0xFFFFF      # x5=0xFFFFF000(-4096)
 slti x2,x5,0x0      # x2=1
 sltiu x2,x5,0x0     # x2=0
 
-sltiu x2,x5,0xF01   # x2=1
+sltiu x2,x5,-0xFF   # x2=1
 andi x2,x5,0x0FF    # x2=0x00000F00
 ori x2,x5,0x00F     # x2=0xFFFFF00F
 xori x2,x5,0x0FF    # x2=0xFFFFF0FF

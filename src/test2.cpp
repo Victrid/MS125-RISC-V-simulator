@@ -114,6 +114,58 @@ TEST(CoreTest, TickTest_Registers) {
     EXPECT_EQ(C.reg[3], 0xFFFFFFFC);
 }
 
+TEST(CoreTest, TickTest_Jump_1) {
+    //This is aimed to test
+    //jumping commands.
+    core_session C("dataset/basic-testset/test-3.data");
+    EXPECT_EQ(C.pc, 0x0000000);
+    C.cycle();
+    EXPECT_EQ(C.pc, 0x0000010);
+    C.cycle();
+    EXPECT_EQ(C.pc, 0x0000014);
+    C.cycle();
+    EXPECT_EQ(C.pc, 0x0000004);
+    C.cycle();
+    EXPECT_EQ(C.pc, 0x000000C);
+    C.cycle();
+    EXPECT_EQ(C.pc, 0x0000008);
+    C.cycle();
+    EXPECT_EQ(C.pc, 0x0000018);
+}
+
+TEST(CoreTest, MemoryWriteTest) {
+    core_session C("dataset/basic-testset/test-5.data");
+    for (int i = 0; i < 7; i++)
+        C.cycle();
+    EXPECT_EQ(C.M.get(0x00001000), 0xEFBEADDE);
+    EXPECT_EQ(C.M.get(0x00001020), 0xEFBE0000);
+    EXPECT_EQ(C.M.get(0x00001040), 0xEF000000);
+    C.cycle();
+    EXPECT_EQ(C.M.get(0x00001000), 0xFFBEADDE);
+}
+
+TEST(CoreTest, MemoryReadTest) {
+    core_session C("dataset/basic-testset/test-6.data");
+    EXPECT_EQ(C.M.get(0xDEADBEEF), P.rearrange(0xDEADC0DE));
+    for (int i = 0; i < 7; i++)
+        C.cycle();
+    EXPECT_EQ(C.M.get(0x00001000), 0xEFBEADDE);
+    EXPECT_EQ(C.M.get(0x00001020), 0xEFBE0000);
+    EXPECT_EQ(C.M.get(0x00001040), 0xEF000000);
+    C.cycle();
+    EXPECT_EQ(C.M.get(0x00001000), 0xFFBEADDE);
+    for (int i = 0; i < 9; i++)
+        C.cycle();
+    EXPECT_EQ(C.reg[13], 0xFFFFFFFF);
+    EXPECT_EQ(C.reg[14], 0x000000FF);
+    EXPECT_EQ(C.reg[15], 0xDEADBEFF);
+    EXPECT_EQ(C.reg[16], 0xFFFFBEEF);
+    EXPECT_EQ(C.reg[17], 0x0000BEEF);
+    EXPECT_EQ(C.M.get(0xDEADBEEF), P.rearrange(0xDEADC0DE));
+    EXPECT_GE(C.pc, 0x3c + 4);
+    EXPECT_EQ(C.reg[23], 0xDEADC0DE);
+}
+
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

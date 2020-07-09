@@ -36,7 +36,7 @@ mempair loader::getline() {
         baseaddr = 0;
         for (int i = 0; i < 8; i++) {
             baseaddr <<= 4;
-            baseaddr += inputline[i + 1] - '0';
+            baseaddr += hextoint(inputline[i+1]);
         }
         return getline();
     }

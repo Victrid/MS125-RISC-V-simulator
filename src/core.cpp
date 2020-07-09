@@ -20,33 +20,33 @@ int core_session::tick() {
         case command::B:
             switch (C.funct3) {
             case 0b000: //BEQ
-                if (reg[C.rs1] == reg[C.rs2]) {
+                if (reg[C.rs1] == reg[C.rs2])
                     pc += P.fint(C.imm);
-                } else
+                else
                     pc += 4;
                 break;
             case 0b001: //BNE
-                if (reg[C.rs1] != reg[C.rs2]) {
+                if (reg[C.rs1] != reg[C.rs2])
                     pc += P.fint(C.imm);
-                } else
+                else
                     pc += 4;
                 break;
             case 0b100: //BLT
-                if (P.fint(reg[C.rs1]) < P.fint(reg[C.rs2])) {
+                if (P.fint(reg[C.rs1]) < P.fint(reg[C.rs2]))
                     pc += P.fint(C.imm);
-                } else
+                else
                     pc += 4;
                 break;
             case 0b101: //BGE
-                if (P.fint(reg[C.rs1]) >= P.fint(reg[C.rs2])) {
+                if (P.fint(reg[C.rs1]) >= P.fint(reg[C.rs2]))
                     pc += P.fint(C.imm);
-                } else
+                else
                     pc += 4;
                 break;
             case 0b110: //BLTU
-                if (reg[C.rs1] < reg[C.rs2]) {
+                if (reg[C.rs1] < reg[C.rs2])
                     pc += P.fint(C.imm);
-                } else
+                else
                     pc += 4;
                 break;
             case 0b111: //BGEU
@@ -78,6 +78,7 @@ int core_session::tick() {
                 mmod.addr    = reg[C.rs1] + P.fint(C.imm);
                 mmod.bits    = 8;
                 mmod.content = reg[C.rs2];
+                break;
             case 0b001: //SH
                 mmod.addr    = reg[C.rs1] + P.fint(C.imm);
                 mmod.bits    = 16;
@@ -93,6 +94,7 @@ int core_session::tick() {
             break;
         case command::Il:
             fmemory = -1;
+            P.padimm(C.imm, 12);
             switch (C.funct3) { //LB
             case 0b000:
                 mreq.addr = reg[C.rs1] + P.fint(C.imm);
@@ -146,7 +148,7 @@ int core_session::tick() {
                 break;
             case 0b011: //SLTIU
                 P.padimm(C.imm, 12);
-                if (reg[C.rs1] < P.fint(C.imm))
+                if (reg[C.rs1] < C.imm)
                     reg[C.rd] = 1;
                 else
                     reg[C.rd] = 0;
@@ -230,39 +232,35 @@ int core_session::tick() {
         if (!fmemory)
             break;
         if (fmemory == 1) {
-            taddr mask = M.get(mmod.addr);
+            taddr mask = P.rearrange(M.get(mmod.addr));
             switch (mmod.bits) {
             case 8:
-                mask         = mask & 0xFFF0;
-                mmod.content = mmod.content & 0x000F;
+                mask         = mask & 0xFFFFFF00;
+                mmod.content = mmod.content & 0x000000FF;
                 break;
             case 16:
-                mask         = mask & 0xFF00;
-                mmod.content = mmod.content & 0x00FF;
+                mask         = mask & 0xFFFF0000;
+                mmod.content = mmod.content & 0x0000FFFF;
                 break;
             case 32:
-                mask         = mask & 0x0000;
-                mmod.content = mmod.content & 0xFFFF;
+                mask         = mask & 0x00000000;
+                mmod.content = mmod.content & 0xFFFFFFFF;
                 break;
             }
-            M.get(mmod.addr) = mask | mmod.content;
+            M.get(mmod.addr) = P.rearrange(mask | mmod.content);
             fmemory          = 0;
         } else {
-            taddr addr;
-            taddr bits;
-            taddr regp;
-            bool sign;
-            taddr mask = M.get(mreq.addr);
-            switch (mmod.bits) {
+            taddr mask = P.rearrange(M.get(mreq.addr));
+            switch (mreq.bits) {
             case 8:
                 mask = P.getdigits(mask, -1, 7);
-                if (sign)
+                if (mreq.sign)
                     P.padimm(mask, 8);
                 break;
             case 16:
-                mask = P.getdigits(mask, -1, 7);
-                if (sign)
-                    P.padimm(mask, 8);
+                mask = P.getdigits(mask, -1, 15);
+                if (mreq.sign)
+                    P.padimm(mask, 16);
                 break;
             case 32:
                 break;
@@ -270,6 +268,7 @@ int core_session::tick() {
             reg[mreq.regp] = mask;
             fmemory        = 0;
         }
+        break;
     case 6: //WB
         reg[0] = 0;
         break;
