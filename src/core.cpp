@@ -62,7 +62,6 @@ int core_session::tick() {
             reg[C.rd] = pc + 4;
             pc += P.fint(C.imm);
             break;
-            break;
         case command::U: //LUI
             reg[C.rd] = C.imm;
             pc += 4;
