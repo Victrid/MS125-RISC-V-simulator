@@ -32,8 +32,6 @@ G(naive, 94);
 // G(superloop, 134);
 
 int main(int argc, char** argv) {
-    // testing::InitGoogleTest(&argc, argv);
-    // return RUN_ALL_TESTS();
-    core_session C("dataset/bulgarian.data");
-    C.run();
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
