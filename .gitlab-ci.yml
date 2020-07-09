@@ -32,4 +32,5 @@ test_coverage:
   stage: test
   script:
     - make test_gcovr
+    - ./test_gcovr
     - gcovr -r .
