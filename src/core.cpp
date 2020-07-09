@@ -318,13 +318,10 @@ int core_session::debug_run() {
     while (!tickret) {
         tickret = cycle();
         printmem(cout);
-        if (!vvred) {
-            vvred--;
-        } else {
-            c = getchar();
-        }
-        if (c == '3')
-            vvred = 1000;
+        // if (pc == 0x118c || pc == 0x1190 || pc == 0x1194 || pc == 0x1198)
+        //     ;
+        // else
+        c = getchar();
     }
     return retval;
 }
