@@ -114,6 +114,12 @@ TEST(CoreTest, TickTest_Registers) {
     EXPECT_EQ(C.reg[3], 0xFFFFFFFC);
 }
 
+
+TEST(CoreTest,TickTest_Reg_ADD_SUB) {
+    core_session C("dataset/basic-testset/test-C.data");
+    EXPECT_EQ(C.run(), 176);
+}
+
 TEST(CoreTest, TickTest_Jump_1) {
     //This is aimed to test
     //jumping commands.
@@ -215,6 +221,7 @@ TEST(CoreTest, ReturnTest_1) {
     core_session C("dataset/sample.data");
     EXPECT_EQ(C.run(), 94);
 };
+
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
