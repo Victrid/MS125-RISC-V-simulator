@@ -25,7 +25,6 @@ G(multiarray, 115);
 G(statement_test, 50);
 G(tak, 186);
 G(superloop, 134);
-//TIME
 G(pi, 137);
 //ERROR
 // G(hanoi, 20);
