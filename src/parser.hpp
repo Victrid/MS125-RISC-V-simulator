@@ -29,6 +29,4 @@ public:
     Parser(){};
 };
 
-// void showfile();
-
 #endif
