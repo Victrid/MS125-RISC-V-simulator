@@ -4,7 +4,6 @@ core_session::core_session(const char* c) : M(), P() {
     M.memload(c);
     pc = 0;
     memset(reg, 0, 32 * sizeof(taddr));
-    round         = 0;
     loaded_memory = 0;
     fmemory       = 0;
     fterm         = 0;
