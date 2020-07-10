@@ -26,7 +26,7 @@ G(statement_test, 50);
 G(tak, 186);
 G(superloop, 134);
 //TIME
-// G(pi, 137);
+G(pi, 137);
 //ERROR
 // G(hanoi, 20);
 // G(queens, 171);
@@ -34,6 +34,6 @@ G(superloop, 134);
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
-    // core_session C("dataset/qsort.data");
+    // core_session C("dataset/pi.data");
     // C.debug_run();
 }
