@@ -187,135 +187,135 @@ ostream& Parser::displayer(command& z, ostream& os) {
         "t4",
         "t5",
         "t6"};
-    os << z.addr << '\t';
-    os << cc[z.instruction] << ' ';
+    // os << std::hex << z.addr << '\t';
+    // os << cc[z.instruction] << ' ';
     switch (z.instruction) {
     case command::B:
         switch (z.funct3) {
         case 0b000:
-            os << "beq\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::hex << z.addr + fint(z.imm);
+            os << "beq\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::hex << z.addr + fint(z.imm);
             break;
         case 0b001:
-            os << "bne\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::hex << z.addr + fint(z.imm);
+            os << "bne\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::hex << z.addr + fint(z.imm);
             break;
         case 0b100:
-            os << "blt\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::hex << z.addr + fint(z.imm);
+            os << "blt\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::hex << z.addr + fint(z.imm);
             break;
         case 0b101:
-            os << "bge\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::hex << z.addr + fint(z.imm);
+            os << "bge\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::hex << z.addr + fint(z.imm);
             break;
         case 0b110:
-            os << "bltu\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::hex << z.addr + fint(z.imm);
+            os << "bltu\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::hex << z.addr + fint(z.imm);
             break;
         case 0b111:
-            os << "bgeu\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::hex << z.addr + fint(z.imm);
+            os << "bgeu\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::hex << z.addr + fint(z.imm);
             break;
         }
         break;
     case command::J:
-        os << "jal\t" << reg[z.rd] << '\t' << std::hex << z.addr + fint(z.imm);
+        os << "jal\t" << reg[z.rd] << ',' << std::hex << z.addr + fint(z.imm);
         break;
     case command::U:
         os << "lui\t" << reg[z.rd] << "\t0x" << std::hex << (z.imm >> 12);
         break;
     case command::Ua:
-        os << "auipc\t" << reg[z.rd] << '\t' << std::hex << z.imm;
+        os << "auipc\t" << reg[z.rd] << ',' << std::hex << z.imm;
         break;
     case command::S:
         switch (z.funct3) {
         case 0b000:
-            os << "sb\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::dec << fint(z.imm);
+            os << "sb\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::dec << fint(z.imm);
             break;
         case 0b001:
-            os << "sh\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::dec << fint(z.imm);
+            os << "sh\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::dec << fint(z.imm);
             break;
         case 0b010:
-            os << "sw\t" << reg[z.rs1] << '\t' << reg[z.rs2] << '\t' << std::dec << fint(z.imm);
+            os << "sw\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::dec << fint(z.imm);
             break;
         }
         break;
     case command::Il:
         switch (z.funct3) {
         case 0b000:
-            os << "lb\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "lb\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b001:
-            os << "lh\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "lh\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b010:
-            os << "lw\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "lw\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b100:
-            os << "lbu\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "lbu\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b101:
-            os << "lhu\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "lhu\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         }
         break;
     case command::I: {
         switch (z.funct3) {
         case 0b000:
-            os << "addi\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "addi\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b010:
-            os << "slti\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "slti\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b100:
-            os << "xori\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "xori\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b110:
-            os << "ori\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "ori\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b111:
-            os << "andi\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << fint(z.imm);
+            os << "andi\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
             break;
         case 0b001:
-            os << "slli\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << z.imm;
+            os << "slli\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << z.imm;
             break;
         case 0b101:
             if (z.funct7 == 0)
-                os << "srli\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << z.imm;
+                os << "srli\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << z.imm;
             else
-                os << "srai\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << z.imm;
+                os << "srai\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << z.imm;
             break;
         }
         break;
     }
     case command::Ij:
-        os << "jalr\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::hex << fint(z.imm);
+        os << "jalr\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::hex << fint(z.imm);
         break;
     case command::R:
         switch (z.funct3) {
         case 0b000:
             if (z.funct7 == 0)
-                os << "add\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+                os << "add\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             else
-                os << "sub\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+                os << "sub\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             break;
         case 0b001:
-            os << "sll\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+            os << "sll\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             break;
         case 0b010:
-            os << "slt\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+            os << "slt\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             break;
         case 0b011:
-            os << "sltu\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+            os << "sltu\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             break;
         case 0b100:
-            os << "xor\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+            os << "xor\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             break;
         case 0b101:
             if (z.funct7 == 0)
-                os << "srl\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+                os << "srl\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             else
-                os << "sra\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+                os << "sra\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             break;
         case 0b110:
-            os << "or\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+            os << "or\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             break;
         case 0b111:
-            os << "and\t" << reg[z.rd] << '\t' << reg[z.rs1] << '\t' << std::dec << reg[z.rs2];
+            os << "and\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << reg[z.rs2];
             break;
         }
     }
