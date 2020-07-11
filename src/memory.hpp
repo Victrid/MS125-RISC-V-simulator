@@ -24,6 +24,7 @@ public:
     taddr& get(taddr address);
     void pagetest(taddr address);
     int memload(const char* c);
+    int memload();
 
 public:
     memory(){};

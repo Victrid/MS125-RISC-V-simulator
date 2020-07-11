@@ -29,6 +29,16 @@ int memory::memload(const char* c) {
     return 0;
 }
 
+int memory::memload() {
+    loader l;
+    mempair m = l.getline();
+    while (m.instruction != 0) {
+        load(m.address, m.instruction);
+        m = l.getline();
+    }
+    return 0;
+}
+
 mempair loader::getline() {
     if (!((*file) >> inputline))
         return mempair{0, 0};
@@ -36,7 +46,7 @@ mempair loader::getline() {
         baseaddr = 0;
         for (int i = 0; i < 8; i++) {
             baseaddr <<= 4;
-            baseaddr += hextoint(inputline[i+1]);
+            baseaddr += hextoint(inputline[i + 1]);
         }
         return getline();
     }
