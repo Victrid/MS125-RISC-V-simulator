@@ -49,6 +49,7 @@ public:
         bool sign;
     } mreq;
     core_session(const char* c);
+    core_session();
     ostream& printmem(ostream& os);
     int tick();
     int cycle();

@@ -14,6 +14,22 @@ core_session::core_session(const char* c) : M(), P() {
     imm           = 0;
     frd           = 0;
 }
+
+core_session::core_session() : M(), P() {
+    M.memload();
+    pc = 0;
+    memset(reg, 0, 32 * sizeof(taddr));
+    round         = 0;
+    loaded_memory = 0;
+    fmemory       = 0;
+    fterm         = 0;
+    rs1           = 0;
+    rs2           = 0;
+    rd            = 0;
+    imm           = 0;
+    frd           = 0;
+}
+
 int core_session::tick() {
     switch (round) {
     case 0: //IF
