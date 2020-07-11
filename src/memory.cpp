@@ -1,6 +1,6 @@
 #include "memory.hpp"
 
-int memory::load(taddr address, taddr c) {
+int Memory::load(taddr address, taddr c) {
     if (page.find(address / 0x1000) == page.end()) {
         page.insert(pair<taddr, taddr*>(address / 0x1000, new taddr[0x1000]()));
     }
@@ -8,18 +8,18 @@ int memory::load(taddr address, taddr c) {
     return 0;
 }
 
-taddr& memory::get(taddr address) {
+taddr& Memory::get(taddr address) {
     pagetest(address);
     return page[address / 0x1000][address % 0x1000];
 }
 
-void memory::pagetest(taddr address) {
+void Memory::pagetest(taddr address) {
     if (page.find(address / 0x1000) == page.end()) {
         page.insert(pair<taddr, taddr*>(address / 0x1000, new taddr[0x1000]()));
     }
 }
 
-int memory::memload(const char* c) {
+int Memory::memload(const char* c) {
     loader l(c);
     mempair m = l.getline();
     while (m.instruction != 0) {
@@ -29,7 +29,7 @@ int memory::memload(const char* c) {
     return 0;
 }
 
-int memory::memload() {
+int Memory::memload() {
     loader l;
     mempair m = l.getline();
     while (m.instruction != 0) {

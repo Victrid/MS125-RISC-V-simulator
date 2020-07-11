@@ -7,7 +7,7 @@
 class core_session {
 public:
     //MEMORY
-    memory M;
+    Memory M;
     //PARSER
     Parser P;
     //PC

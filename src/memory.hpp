@@ -17,7 +17,7 @@ public:
     loader() : file() { file = &cin; }
 };
 
-class memory {
+class Memory {
 public:
     map<taddr, taddr*> page;
     int load(taddr address, taddr c);
@@ -27,7 +27,7 @@ public:
     int memload();
 
 public:
-    memory(){};
+    Memory(){};
 };
 
 #endif

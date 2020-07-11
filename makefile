@@ -16,6 +16,11 @@ linkfile/libcore.a: src/core.cpp linkfile
 	ar rcs linkfile/libcore.a libcore.o
 	rm libcore.o
 
+linkfile/libcorep.a : src/core_pipeline.cpp linkfile
+	g++ -O3 -c -o libcorep.o src/core_pipeline.cpp
+	ar rcs linkfile/libcorep.a libcorep.o
+	rm libcorep.o
+
 code: src/main_seq.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser.a
 	g++ -O3 -L linkfile -o code src/main_seq.cpp -lcore -lmemory -lparser
 

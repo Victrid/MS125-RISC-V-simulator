@@ -54,7 +54,7 @@ TEST(LoaderTest, getline_2) {
 
 TEST(MemTest, Loadtest) {
     loader l;
-    memory M;
+    Memory M;
     mempair m = l.getline();
     while (m.instruction != 0) {
         M.load(m.address, m.instruction);
@@ -64,7 +64,7 @@ TEST(MemTest, Loadtest) {
 }
 
 TEST(MemTest, MemLoad_get_test) {
-    memory M;
+    Memory M;
     M.memload();
     auto t = P.Splitter(M.get(0x00001018), 0x00001018);
     auto z = P.Splitter(0x83470500, 0x00001018);
@@ -79,7 +79,7 @@ TEST(MemTest, MemLoad_get_test) {
 }
 
 TEST(MemTest, MemLoad_get_test_2) {
-    memory M;
+    Memory M;
     M.memload();
     auto t = P.Splitter(M.get(0x00001018), 0x00001018);
     auto z = P.Splitter(0x83470500, 0x00001018);
