@@ -1,3 +1,5 @@
+//This is the old core test.
+//SEQUENTIAL TEST
 #include "core.hpp"
 #include "globaldef.hpp"
 #include "memory.hpp"
@@ -217,10 +219,10 @@ TEST(CoreTest, BranchTest_4_BGE_U) {
     }
 }
 
-TEST(CoreTest, ReturnTest_1) {
-    core_session C("dataset/sample.data");
-    EXPECT_EQ(C.run(), 94);
-};
+// TEST(CoreTest, ReturnTest_1) {
+//     core_session C("dataset/sample.data");
+//     EXPECT_EQ(C.run(), 94);
+// };
 
 
 int main(int argc, char** argv) {

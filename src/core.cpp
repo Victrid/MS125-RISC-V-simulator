@@ -4,6 +4,7 @@ core_session::core_session(const char* c) : M(), P() {
     M.memload(c);
     pc = 0;
     memset(reg, 0, 32 * sizeof(taddr));
+    round         = 0;
     loaded_memory = 0;
     fmemory       = 0;
     fterm         = 0;
@@ -29,7 +30,7 @@ int core_session::tick() {
         break;
     case 2: //EX
         switch (C.instruction) {
-        case command::B:
+        case instr::B:
             switch (C.funct3) {
             case 0b000: //BEQ
                 if (rs1 == rs2)
@@ -57,21 +58,21 @@ int core_session::tick() {
                 break;
             }
             break;
-        case command::J: //JAL
+        case instr::J: //JAL
             ex_result = pc + 4;
             mod_pc    = pc + P.fint(imm);
             frd       = true;
             break;
-        case command::U: //LUI
+        case instr::U: //LUI
             ex_result = imm;
             frd       = true;
             break;
-        case command::Ua: //AUIPC
+        case instr::Ua: //AUIPC
             ex_result = imm;
             ex_result += pc;
             frd = true;
             break;
-        case command::S:
+        case instr::S:
             fmemory = 1;
             switch (C.funct3) {
             case 0b000: //SB
@@ -91,7 +92,7 @@ int core_session::tick() {
                 break;
             }
             break;
-        case command::Il:
+        case instr::Il:
             fmemory = -1;
             P.padimm(imm, 12);
             switch (C.funct3) { //LB
@@ -127,17 +128,15 @@ int core_session::tick() {
                 break;
             }
             break;
-        case command::I:
+        case instr::T:
+            retval = reg[0b01010] & 255u;
+            fterm  = true;
+            break;
+        case instr::I:
             switch (C.funct3) {
             case 0b000: //ADDI
-                if ((C.rd == 10) && (C.rs1 == 0) && imm == 255) {
-                    //TERM
-                    retval = reg[0b01010] & 255u;
-                    fterm  = true;
-                } else {
-                    ex_result = P.ftaddr(P.fint(rs1) + P.fint(imm));
-                    frd       = true;
-                }
+                ex_result = P.ftaddr(P.fint(rs1) + P.fint(imm));
+                frd       = true;
                 break;
             case 0b010: //SLTI
                 P.padimm(imm, 12);
@@ -177,12 +176,12 @@ int core_session::tick() {
                 break;
             }
             break;
-        case command::Ij: //JALR
+        case instr::Ij: //JALR
             ex_result = pc + 4;
             mod_pc    = rs1 + P.fint(imm);
             frd       = true;
             break;
-        case command::R:
+        case instr::R:
             switch (C.funct3) {
             case 0b000:
                 if (C.funct7 == 0) //ADD

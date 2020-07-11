@@ -1,4 +1,5 @@
-#include "core.hpp"
+//This is for parser and memory load/store test.
+
 #include "globaldef.hpp"
 #include "memory.hpp"
 #include "parser.hpp"
@@ -6,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 using namespace std;
+
 Parser P;
 
 TEST(LoaderTest, getline_1) {
@@ -60,7 +62,7 @@ TEST(ParserTest, RSplitter_XOR) {
     //xor	a0,a0,a5
     auto z = P.RSplitter(0x00f54533, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::R);
+    EXPECT_EQ(z.instruction, instr::R);
     EXPECT_EQ(z.rd, 0b01010) << z.rd;
     EXPECT_EQ(z.funct3, 0b100);
     EXPECT_EQ(z.rs1, 0b01010);
@@ -72,7 +74,7 @@ TEST(ParserTest, ISplitter_ADDI_1_Positive) {
     //addi	a0,a0,173 ADDI rd,rs1,imm
     auto z = P.ISplitter(0x0ad50513, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.instruction, instr::I);
     EXPECT_EQ(z.rd, 0b01010);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b01010);
@@ -83,7 +85,7 @@ TEST(ParserTest, ISplitter_ADDI_2_Negative) {
     //addi	sp,sp,-32
     auto z = P.ISplitter(0xfe010113, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.instruction, instr::I);
     EXPECT_EQ(z.rd, 0b00010);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b00010);
@@ -94,7 +96,7 @@ TEST(ParserTest, IsSplitter_SRLI_1) {
     //srli	a3,a3,0x1
     auto z = P.IsSplitter(0x0016d693, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.instruction, instr::I);
     EXPECT_EQ(z.rd, 0b01101);
     EXPECT_EQ(z.funct3, 0b101);
     EXPECT_EQ(z.rs1, 0b01101);
@@ -106,7 +108,7 @@ TEST(ParserTest, IsSplitter_SRLI_2) {
     //srli	a2,a2,0x1
     auto z = P.IsSplitter(0x00165613, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.instruction, instr::I);
     EXPECT_EQ(z.rd, 0b01100);
     EXPECT_EQ(z.funct3, 0b101);
     EXPECT_EQ(z.rs1, 0b01100);
@@ -119,7 +121,7 @@ TEST(ParserTest, IlSplitter) {
     //0b0 00010 000 01101 0000011
     auto z = P.IlSplitter(0x00010683, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::Il);
+    EXPECT_EQ(z.instruction, instr::Il);
     EXPECT_EQ(z.rd, 0b01101);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b00010);
@@ -131,7 +133,7 @@ TEST(ParserTest, SSplitter_1) {
     auto z = P.SSplitter(0x00c68223, 0x1357ABCD);
     //0b 00000 01100 01101 000 00100 0100011;
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::S);
+    EXPECT_EQ(z.instruction, instr::S);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b01101);
     EXPECT_EQ(z.rs2, 0b01100);
@@ -143,7 +145,7 @@ TEST(ParserTest, SSplitter_2) {
     auto z = P.SSplitter(0x1a042023, 0x1357ABCD);
     //0b 0001101 00000 01000 010 00000 0100011
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::S);
+    EXPECT_EQ(z.instruction, instr::S);
     EXPECT_EQ(z.funct3, 0b010);
     EXPECT_EQ(z.rs1, 0b01000);
     EXPECT_EQ(z.rs2, 0b00000);
@@ -155,7 +157,7 @@ TEST(ParserTest, USplitter_LUI) {
     auto z = P.USplitter(0x00020137, 0x1357ABCD);
     //0b 100000 00010 0110111
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::U);
+    EXPECT_EQ(z.instruction, instr::U);
     EXPECT_EQ(z.rd, 0b00010);
     EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
 }
@@ -165,7 +167,7 @@ TEST(ParserTest, USplitter_AUIPC) {
     auto z = P.USplitter(0x00020117, 0x1357ABCD);
     //0b 100000 00010 0010111
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::Ua);
+    EXPECT_EQ(z.instruction, instr::Ua);
     EXPECT_EQ(z.rd, 0b00010);
     EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
 }
@@ -175,7 +177,7 @@ TEST(ParserTest, BSplitter) {
     auto z = P.BSplitter(0xfef708e3, 0x1357ABCD);
     //0b1111111 01111 01110 000 10001 1100011
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::B);
+    EXPECT_EQ(z.instruction, instr::B);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b01110);
     EXPECT_EQ(z.rs2, 0b01111);
@@ -187,7 +189,7 @@ TEST(ParserTest, BSplitter_2) {
     auto z = P.BSplitter(0x06d75e63, 0x1357ABCD);
     //0b1111111 01111 01110 000 10001 1100011
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::B);
+    EXPECT_EQ(z.instruction, instr::B);
     EXPECT_EQ(z.funct3, 0b101);
     EXPECT_EQ(z.rs1, 0b01110);
     EXPECT_EQ(z.rs2, 0b01101);
@@ -199,7 +201,7 @@ TEST(ParserTest, JSplitter) {
     auto z = P.JSplitter(0xf99ff0ef, 0x1357ABCD);
     //0b 1 1111001100 1 11111111 00001 1101111
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::J);
+    EXPECT_EQ(z.instruction, instr::J);
     EXPECT_EQ(z.rd, 0b00001);
     EXPECT_EQ(z.imm, 0b11111111111111111111111110011000);
 }
@@ -208,7 +210,7 @@ TEST(ParserTest, Splitter_1) {
     //xor	a0,a0,a5
     auto z = P.Splitter(0x3345f500, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::R);
+    EXPECT_EQ(z.instruction, instr::R);
     EXPECT_EQ(z.rd, 0b01010) << z.rd;
     EXPECT_EQ(z.funct3, 0b100);
     EXPECT_EQ(z.rs1, 0b01010);
@@ -220,7 +222,7 @@ TEST(ParserTest, Splitter_2) {
     //addi	a0,a0,173 ADDI rd,rs1,imm
     auto z = P.Splitter(0x1305d50a, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.instruction, instr::I);
     EXPECT_EQ(z.rd, 0b01010);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b01010);
@@ -231,7 +233,7 @@ TEST(ParserTest, Splitter_3) {
     //addi	sp,sp,-32
     auto z = P.Splitter(0x130101fe, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.instruction, instr::I);
     EXPECT_EQ(z.rd, 0b00010);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b00010);
@@ -242,7 +244,7 @@ TEST(ParserTest, Splitter_4) {
     //srli	a3,a3,0x1
     auto z = P.Splitter(0x93d61600, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.instruction, instr::I);
     EXPECT_EQ(z.rd, 0b01101);
     EXPECT_EQ(z.funct3, 0b101);
     EXPECT_EQ(z.rs1, 0b01101);
@@ -254,7 +256,7 @@ TEST(ParserTest, Splitter_5) {
     //srli	a2,a2,0x1
     auto z = P.Splitter(0x13561600, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::I);
+    EXPECT_EQ(z.instruction, instr::I);
     EXPECT_EQ(z.rd, 0b01100);
     EXPECT_EQ(z.funct3, 0b101);
     EXPECT_EQ(z.rs1, 0b01100);
@@ -267,7 +269,7 @@ TEST(ParserTest, Splitter_6) {
     auto z = P.Splitter(0x2382c600, 0x1357ABCD);
     //0b 00000 01100 01101 000 00100 0100011;
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::S);
+    EXPECT_EQ(z.instruction, instr::S);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b01101);
     EXPECT_EQ(z.rs2, 0b01100);
@@ -279,7 +281,7 @@ TEST(ParserTest, Splitter_7) {
     auto z = P.Splitter(0x2320041a, 0x1357ABCD);
     //0b00011010000001000010000000100011
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::S);
+    EXPECT_EQ(z.instruction, instr::S);
     EXPECT_EQ(z.funct3, 0b010);
     EXPECT_EQ(z.rs1, 0b01000);
     EXPECT_EQ(z.rs2, 0b00000);
@@ -291,7 +293,7 @@ TEST(ParserTest, Splitter_8) {
     auto z = P.Splitter(0x37010200, 0x1357ABCD);
     //0b 100000 00010 0110111
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::U);
+    EXPECT_EQ(z.instruction, instr::U);
     EXPECT_EQ(z.rd, 0b00010);
     EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
 }
@@ -301,7 +303,7 @@ TEST(ParserTest, Splitter_9) {
     auto z = P.Splitter(0xe308f7fe, 0x1357ABCD);
     //0b1111111 01111 01110 000 10001 1100011
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::B);
+    EXPECT_EQ(z.instruction, instr::B);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b01110);
     EXPECT_EQ(z.rs2, 0b01111);
@@ -313,7 +315,7 @@ TEST(ParserTest, Splitter_10) {
     auto z = P.Splitter(0xeff09ff9, 0x1357ABCD);
     //0b11111001100111111111 00001 1101111
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::J);
+    EXPECT_EQ(z.instruction, instr::J);
     EXPECT_EQ(z.rd, 0b00001);
     EXPECT_EQ(z.imm, 0b11111111111111111111111110011000);
 }
@@ -323,7 +325,7 @@ TEST(ParserTest, Splitter_11) {
     auto z = P.Splitter(0x17010200, 0x1357ABCD);
     //0b100000000100010111
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::Ua);
+    EXPECT_EQ(z.instruction, instr::Ua);
     EXPECT_EQ(z.rd, 0b00010);
     EXPECT_EQ(z.imm, 0b00000000000000100000000000000000);
 }
@@ -331,11 +333,17 @@ TEST(ParserTest, Splitter_11) {
 TEST(ParserTest, Splitter_12) {
     auto z = P.Splitter(0x83060100, 0x1357ABCD);
     EXPECT_EQ(z.addr, 0x1357ABCD);
-    EXPECT_EQ(z.instruction, command::Il);
+    EXPECT_EQ(z.instruction, instr::Il);
     EXPECT_EQ(z.rd, 0b01101);
     EXPECT_EQ(z.funct3, 0b000);
     EXPECT_EQ(z.rs1, 0b00010);
     EXPECT_EQ(z.imm, 0b0);
+}
+
+TEST(ParserTest, Splitter_Term) {
+    auto z = P.Splitter(0x1305F00F, 0x1357ABCD);
+    EXPECT_EQ(z.addr, 0x1357ABCD);
+    EXPECT_EQ(z.instruction, instr::T);
 }
 
 TEST(MemTest, Loadtest) {

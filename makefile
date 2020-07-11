@@ -1,12 +1,12 @@
 test_1: src/test1.cpp src/core.cpp src/parser.cpp src/memory.cpp
-	g++ -o test_1 src/test1.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
+	g++ -o test_1 src/test1.cpp src/parser.cpp src/memory.cpp -lgtest
 	
 test_2: src/test2.cpp src/core.cpp src/parser.cpp src/memory.cpp
 	g++ -o test_2 src/test2.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
 
 test_3: src/test3.cpp src/core.cpp src/parser.cpp src/memory.cpp
 	g++ -o test_3 src/test3.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
-	
+
 test_gcovr: src/test_all.cpp src/core.cpp src/parser.cpp src/memory.cpp
 	g++ -fprofile-arcs -ftest-coverage -fPIC -O0 -o test_gcovr src/test_all.cpp src/core.cpp src/parser.cpp src/memory.cpp -lgtest
 
@@ -18,7 +18,7 @@ unit_test: clean test_1 test_2 test_3
 
 unit_test_1: clean test_1
 	./test_1
-
+	
 unit_test_2: clean test_2
 	./test_2
 
