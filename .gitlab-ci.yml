@@ -27,6 +27,11 @@ test3:
   stage: test
   script:
     - make unit_test_3
+  
+test4:
+  stage: test
+  script:
+    - make unit_test_4
 
 test_input:
   stage: test

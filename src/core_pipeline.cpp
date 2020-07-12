@@ -55,7 +55,8 @@ void core_session::occupy(command toex) {
     case instr::I:
     case instr::Ij:
     case instr::J: //JAL
-        regoccupy[toex.rd] = true;
+        if (toex.rd)
+            regoccupy[toex.rd] = true;
         return;
     }
 }
@@ -79,8 +80,10 @@ int WB::tick() {
     if (!ActionQueue.empty()) {
         Action = ActionQueue.front();
         ActionQueue.pop();
-        core->reg[Action.address] = Action.instruction;
-        core->release(Action.address);
+        if (Action.address) { //To avoid 0 write
+            core->reg[Action.address] = Action.instruction;
+            core->release(Action.address);
+        }
     }
     return 0;
 }
@@ -475,31 +478,39 @@ void core_session::datastall() {
     return;
 }
 
+int core_session::tick() {
+    int ip = 0;
+    cWB.tick();
+    cMEM.tick();
+    ip = cEX.tick();
+    if (termflag)
+        return ip;
+    if (jumpstallflag) {
+        if (cEX.empty() && cMEM.empty() && cWB.empty()) {
+            jumpstallflag = false;
+            while (!cID.ActionQueue.empty())
+                cID.ActionQueue.pop();
+            cID.stall = false;
+        } else {
+            cID.stall = true;
+        }
+    }
+    cID.tick();
+    if (datastallflag || jumpstallflag) {
+        cIF.stall = true;
+    } else {
+        cIF.stall = false;
+    }
+    cIF.tick();
+    return 0;
+}
+
 int core_session::run() {
     int ip = 0;
     while (true) {
-        cWB.tick();
-        cMEM.tick();
-        ip = cEX.tick();
+        ip = tick();
         if (termflag)
             return ip;
-        if (jumpstallflag) {
-            if (cEX.empty() && cMEM.empty() && cWB.empty()) {
-                jumpstallflag = false;
-                while (!cID.ActionQueue.empty())
-                    cID.ActionQueue.pop();
-                cID.stall = false;
-            } else {
-                cID.stall = true;
-            }
-        }
-        cID.tick();
-        if (datastallflag || jumpstallflag) {
-            cIF.stall = true;
-        } else {
-            cIF.stall = false;
-        }
-        cIF.tick();
     }
 }
 

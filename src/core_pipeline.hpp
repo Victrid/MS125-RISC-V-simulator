@@ -94,6 +94,7 @@ public:
 
     core_session(const char* ch);
     core_session();
+    int tick();
     int run();
 };
 

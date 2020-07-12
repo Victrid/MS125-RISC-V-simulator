@@ -47,6 +47,7 @@ unit_test: test_1 test_2 test_3 test_stdin
 	./test_2
 	./test_3
 	./test_stdin < dataset/stdin-testset/test1.data
+	./test_4
 
 .PHONY: unit_test_1
 unit_test_1: test_1
