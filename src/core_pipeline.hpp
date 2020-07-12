@@ -10,35 +10,40 @@ class stage {
 public:
     core_session* core;
     stage(core_session* c);
+    virtual int tick()   = 0;
+    virtual bool empty() = 0;
     bool stall;
 };
 
 class WB : public stage {
 public:
-    queue<mempair> WriteReg;
-    mempair towrite;
+    queue<mempair> ActionQueue;
+    mempair Action;
     int enqueue(mempair m);
     int tick();
+    bool empty();
     WB(core_session* c);
 };
 
 class MEM : public stage {
 public:
     Parser P;
-    queue<memmanip> MemMan;
-    memmanip tomanip;
+    queue<memmanip> ActionQueue;
+    memmanip Action;
     int enqueue(memmanip m);
     int tick();
+    bool empty();
     MEM(core_session* c);
 };
 
 class EX : public stage {
 public:
     Parser P;
-    queue<excute> ComEX;
-    excute toex;
+    queue<excute> ActionQueue;
+    excute Action;
     int enqueue(excute m);
     int tick();
+    bool empty();
     EX(core_session* c);
 };
 
@@ -46,16 +51,18 @@ class ID : public stage {
     Parser P;
 
 public:
-    queue<mempair> decodelst;
-    mempair getdecode;
+    queue<mempair> ActionQueue;
+    mempair Action;
     int enqueue(mempair m);
     int tick();
+    bool empty();
     ID(core_session* c);
 };
 
 class IF : public stage {
 public:
     int tick();
+    bool empty();
     IF(core_session* c);
 };
 
@@ -67,6 +74,7 @@ public:
 
     bool jumpstallflag;
     bool datastallflag;
+    bool termflag;
 
     void jumpstall();
     void datastall();
@@ -86,6 +94,7 @@ public:
 
     core_session(const char* ch);
     core_session();
+    int run();
 };
 
 #endif

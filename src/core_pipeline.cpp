@@ -5,6 +5,7 @@ core_session::core_session(const char* ch) : cWB(this), cIF(this), cID(this), cE
     memory.memload(ch);
     jumpstallflag = false;
     datastallflag = false;
+    termflag      = false;
     npc           = 0;
 };
 
@@ -14,6 +15,7 @@ core_session::core_session() : cWB(this), cIF(this), cID(this), cEX(this), cMEM(
     memory.memload();
     jumpstallflag = false;
     datastallflag = false;
+    termflag      = false;
     npc           = 0;
 };
 
@@ -67,18 +69,18 @@ void core_session::release(taddr t) {
 stage::stage(core_session* c) : core(c), stall(false){};
 
 int WB::enqueue(mempair m) {
-    WriteReg.push(m);
+    ActionQueue.push(m);
     return 0;
 }
 
 int WB::tick() {
     if (stall)
         return 0;
-    if (!WriteReg.empty()) {
-        towrite = WriteReg.front();
-        WriteReg.pop();
-        core->reg[towrite.address] = towrite.instruction;
-        core->release(towrite.address);
+    if (!ActionQueue.empty()) {
+        Action = ActionQueue.front();
+        ActionQueue.pop();
+        core->reg[Action.address] = Action.instruction;
+        core->release(Action.address);
     }
     return 0;
 }
@@ -86,54 +88,54 @@ int WB::tick() {
 WB::WB(core_session* c) : stage(c){};
 
 int MEM::enqueue(memmanip m) {
-    MemMan.push(m);
+    ActionQueue.push(m);
     return 0;
 }
 
 int MEM::tick() {
     if (stall)
         return 0;
-    if (!MemMan.empty()) {
-        tomanip = MemMan.front();
-        MemMan.pop();
-        if (tomanip.rdproc) {
-            core->cWB.enqueue(tomanip.rdwr);
+    if (!ActionQueue.empty()) {
+        Action = ActionQueue.front();
+        ActionQueue.pop();
+        if (Action.rdproc) {
+            core->cWB.enqueue(Action.rdwr);
             return 0;
         }
-        if (!tomanip.read) {
-            taddr mask = P.rearrange(core->memory.get(tomanip.address));
-            switch (tomanip.bits) {
+        if (!Action.read) {
+            taddr mask = P.rearrange(core->memory.get(Action.address));
+            switch (Action.bits) {
             case 8:
-                mask            = mask & 0xFFFFFF00;
-                tomanip.content = tomanip.content & 0x000000FF;
+                mask           = mask & 0xFFFFFF00;
+                Action.content = Action.content & 0x000000FF;
                 break;
             case 16:
-                mask            = mask & 0xFFFF0000;
-                tomanip.content = tomanip.content & 0x0000FFFF;
+                mask           = mask & 0xFFFF0000;
+                Action.content = Action.content & 0x0000FFFF;
                 break;
             case 32:
-                mask            = mask & 0x00000000;
-                tomanip.content = tomanip.content & 0xFFFFFFFF;
+                mask           = mask & 0x00000000;
+                Action.content = Action.content & 0xFFFFFFFF;
                 break;
             }
-            core->memory.get(tomanip.address) = P.rearrange(mask | tomanip.content);
+            core->memory.get(Action.address) = P.rearrange(mask | Action.content);
         } else {
-            taddr mask = P.rearrange(core->memory.get(tomanip.address));
-            switch (tomanip.bits) {
+            taddr mask = P.rearrange(core->memory.get(Action.address));
+            switch (Action.bits) {
             case 8:
                 mask = P.getdigits(mask, -1, 7);
-                if (tomanip.sign)
+                if (Action.sign)
                     P.padimm(mask, 8);
                 break;
             case 16:
                 mask = P.getdigits(mask, -1, 15);
-                if (tomanip.sign)
+                if (Action.sign)
                     P.padimm(mask, 16);
                 break;
             case 32:
                 break;
             }
-            core->cWB.enqueue(mempair{tomanip.rd, mask});
+            core->cWB.enqueue(mempair{Action.rd, mask});
         }
     }
     return 0;
@@ -142,263 +144,263 @@ int MEM::tick() {
 MEM::MEM(core_session* c) : stage(c) {}
 
 int EX::enqueue(excute m) {
-    ComEX.push(m);
+    ActionQueue.push(m);
     return 0;
 }
 
 int EX::tick() {
-    if (!ComEX.empty()) {
-        toex = ComEX.front();
-        ComEX.pop();
+    if (!ActionQueue.empty()) {
+        Action = ActionQueue.front();
+        ActionQueue.pop();
         memmanip man;
-        switch (toex.instruction) {
+        switch (Action.instruction) {
         case instr::T:
             core->term();
             break;
         case instr::B:
-            switch (toex.funct3) {
+            switch (Action.funct3) {
             case 0b000: //BEQ
-                if (toex.rs1 == toex.rs2) {
+                if (Action.rs1 == Action.rs2) {
                     core->jumpstall();
-                    core->pcmod(toex.addr + P.fint(toex.imm));
+                    core->pcmod(Action.addr + P.fint(Action.imm));
                 }
                 break;
             case 0b001: //BNE
-                if (toex.rs1 != toex.rs2) {
+                if (Action.rs1 != Action.rs2) {
                     core->jumpstall();
-                    core->pcmod(toex.addr + P.fint(toex.imm));
+                    core->pcmod(Action.addr + P.fint(Action.imm));
                 }
                 break;
             case 0b100: //BLT
-                if (P.fint(toex.rs1) < P.fint(toex.rs2)) {
+                if (P.fint(Action.rs1) < P.fint(Action.rs2)) {
                     core->jumpstall();
-                    core->pcmod(toex.addr + P.fint(toex.imm));
+                    core->pcmod(Action.addr + P.fint(Action.imm));
                 }
                 break;
             case 0b101: //BGE
-                if (P.fint(toex.rs1) >= P.fint(toex.rs2)) {
+                if (P.fint(Action.rs1) >= P.fint(Action.rs2)) {
                     core->jumpstall();
-                    core->pcmod(toex.addr + P.fint(toex.imm));
+                    core->pcmod(Action.addr + P.fint(Action.imm));
                 }
                 break;
             case 0b110: //BLTU
-                if (toex.rs1 < toex.rs2) {
+                if (Action.rs1 < Action.rs2) {
                     core->jumpstall();
-                    core->pcmod(toex.addr + P.fint(toex.imm));
+                    core->pcmod(Action.addr + P.fint(Action.imm));
                 }
                 break;
             case 0b111: //BGEU
-                if (toex.rs1 >= toex.rs2) {
+                if (Action.rs1 >= Action.rs2) {
                     core->jumpstall();
-                    core->pcmod(toex.addr + P.fint(toex.imm));
+                    core->pcmod(Action.addr + P.fint(Action.imm));
                 }
                 break;
             }
             break;
         case instr::J: //JAL
             core->jumpstall();
-            core->pcmod(toex.addr + P.fint(toex.imm));
+            core->pcmod(Action.addr + P.fint(Action.imm));
             man.rdproc = true;
-            man.rdwr   = mempair{toex.rd, toex.addr + 4};
+            man.rdwr   = mempair{Action.rd, Action.addr + 4};
             core->cMEM.enqueue(man);
             break;
         case instr::U: //LUI
             man.rdproc = true;
-            man.rdwr   = mempair{toex.rd, toex.imm};
+            man.rdwr   = mempair{Action.rd, Action.imm};
             core->cMEM.enqueue(man);
             break;
         case instr::Ua: //AUIPC
             man.rdproc = true;
-            man.rdwr   = mempair{toex.rd, toex.imm + toex.addr};
+            man.rdwr   = mempair{Action.rd, Action.imm + Action.addr};
             core->cMEM.enqueue(man);
             break;
         case instr::S:
-            switch (toex.funct3) {
+            switch (Action.funct3) {
             case 0b000: //SB
                 man.rdproc  = false;
                 man.read    = false;
-                man.address = toex.rs1 + P.fint(toex.imm);
+                man.address = Action.rs1 + P.fint(Action.imm);
                 man.bits    = 8;
-                man.content = toex.rs2;
+                man.content = Action.rs2;
                 core->cMEM.enqueue(man);
                 break;
             case 0b001: //SH
                 man.rdproc  = false;
                 man.read    = false;
-                man.address = toex.rs1 + P.fint(toex.imm);
+                man.address = Action.rs1 + P.fint(Action.imm);
                 man.bits    = 16;
-                man.content = toex.rs2;
+                man.content = Action.rs2;
                 core->cMEM.enqueue(man);
                 break;
             case 0b010: //SW
                 man.rdproc  = false;
                 man.read    = false;
-                man.address = toex.rs1 + P.fint(toex.imm);
+                man.address = Action.rs1 + P.fint(Action.imm);
                 man.bits    = 32;
-                man.content = toex.rs2;
+                man.content = Action.rs2;
                 core->cMEM.enqueue(man);
                 break;
             }
             break;
         case instr::Il:
-            P.padimm(toex.imm, 12);
-            switch (toex.funct3) { //LB
+            P.padimm(Action.imm, 12);
+            switch (Action.funct3) { //LB
             case 0b000:
                 man.rdproc  = false;
                 man.read    = true;
-                man.address = toex.rs1 + P.fint(toex.imm);
+                man.address = Action.rs1 + P.fint(Action.imm);
                 man.bits    = 8;
-                man.rd      = toex.rd;
+                man.rd      = Action.rd;
                 man.sign    = true;
                 core->cMEM.enqueue(man);
                 break;
             case 0b001: //LH
                 man.rdproc  = false;
                 man.read    = true;
-                man.address = toex.rs1 + P.fint(toex.imm);
+                man.address = Action.rs1 + P.fint(Action.imm);
                 man.bits    = 16;
-                man.rd      = toex.rd;
+                man.rd      = Action.rd;
                 man.sign    = true;
                 core->cMEM.enqueue(man);
                 break;
             case 0b010: //LW
                 man.rdproc  = false;
                 man.read    = true;
-                man.address = toex.rs1 + P.fint(toex.imm);
+                man.address = Action.rs1 + P.fint(Action.imm);
                 man.bits    = 32;
-                man.rd      = toex.rd;
+                man.rd      = Action.rd;
                 man.sign    = true;
                 core->cMEM.enqueue(man);
                 break;
             case 0b100: //LBU
                 man.rdproc  = false;
                 man.read    = true;
-                man.address = toex.rs1 + P.fint(toex.imm);
+                man.address = Action.rs1 + P.fint(Action.imm);
                 man.bits    = 8;
-                man.rd      = toex.rd;
+                man.rd      = Action.rd;
                 man.sign    = false;
                 core->cMEM.enqueue(man);
                 break;
             case 0b101: //LHU
                 man.rdproc  = false;
                 man.read    = true;
-                man.address = toex.rs1 + P.fint(toex.imm);
+                man.address = Action.rs1 + P.fint(Action.imm);
                 man.bits    = 16;
-                man.rd      = toex.rd;
+                man.rd      = Action.rd;
                 man.sign    = false;
                 core->cMEM.enqueue(man);
                 break;
             }
             break;
         case instr::I:
-            switch (toex.funct3) {
+            switch (Action.funct3) {
             case 0b000: //ADDI
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, P.ftaddr(P.fint(toex.rs1) + P.fint(toex.imm))};
+                man.rdwr   = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) + P.fint(Action.imm))};
                 core->cMEM.enqueue(man);
                 break;
             case 0b010: //SLTI
-                P.padimm(toex.imm, 12);
+                P.padimm(Action.imm, 12);
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (P.fint(toex.rs1) < P.fint(toex.imm))};
+                man.rdwr   = mempair{Action.rd, (P.fint(Action.rs1) < P.fint(Action.imm))};
                 core->cMEM.enqueue(man);
                 break;
             case 0b011: //SLTIU
-                P.padimm(toex.imm, 12);
+                P.padimm(Action.imm, 12);
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (toex.rs1 < toex.imm)};
+                man.rdwr   = mempair{Action.rd, (Action.rs1 < Action.imm)};
                 core->cMEM.enqueue(man);
                 break;
             case 0b100: //XORI
-                P.padimm(toex.imm, 12);
+                P.padimm(Action.imm, 12);
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (toex.rs1 ^ toex.imm)};
+                man.rdwr   = mempair{Action.rd, (Action.rs1 ^ Action.imm)};
                 core->cMEM.enqueue(man);
                 break;
             case 0b110: //ORI
-                P.padimm(toex.imm, 12);
+                P.padimm(Action.imm, 12);
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (toex.rs1 | toex.imm)};
+                man.rdwr   = mempair{Action.rd, (Action.rs1 | Action.imm)};
                 core->cMEM.enqueue(man);
                 break;
             case 0b111: //ANDI
-                P.padimm(toex.imm, 12);
+                P.padimm(Action.imm, 12);
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (toex.rs1 & toex.imm)};
+                man.rdwr   = mempair{Action.rd, (Action.rs1 & Action.imm)};
                 core->cMEM.enqueue(man);
                 break;
             case 0b001: //SLLI
-                P.padimm(toex.imm, 12);
+                P.padimm(Action.imm, 12);
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (toex.rs1 << toex.imm)};
+                man.rdwr   = mempair{Action.rd, (Action.rs1 << Action.imm)};
                 core->cMEM.enqueue(man);
                 break;
             case 0b101:
                 man.rdproc = false;
-                if (toex.funct7 == 0) //SRLI
-                    man.rdwr = mempair{toex.rd, (toex.rs1 >> toex.imm)};
+                if (Action.funct7 == 0) //SRLI
+                    man.rdwr = mempair{Action.rd, (Action.rs1 >> Action.imm)};
                 else //SRAI
-                    man.rdwr = mempair{toex.rd, P.ftaddr(P.fint(toex.rs1) >> toex.imm)};
+                    man.rdwr = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) >> Action.imm)};
                 core->cMEM.enqueue(man);
                 break;
             }
             break;
         case instr::Ij: //JALR
             core->jumpstall();
-            core->pcmod(toex.addr + P.fint(toex.imm));
+            core->pcmod(Action.addr + P.fint(Action.imm));
             man.rdproc = true;
-            man.rdwr   = mempair{toex.rd, toex.addr + 4};
+            man.rdwr   = mempair{Action.rd, Action.addr + 4};
             core->cMEM.enqueue(man);
             break;
         case instr::R:
-            switch (toex.funct3) {
+            switch (Action.funct3) {
             case 0b000:
-                if (toex.funct7 == 0) //ADD
+                if (Action.funct7 == 0) //ADD
                 {
                     man.rdproc = false;
-                    man.rdwr   = mempair{toex.rd, P.ftaddr(P.fint(toex.rs1) + P.fint(toex.rs2))};
+                    man.rdwr   = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) + P.fint(Action.rs2))};
                     core->cMEM.enqueue(man);
                 } else //SUB{
                     man.rdproc = false;
-                man.rdwr = mempair{toex.rd, P.ftaddr(P.fint(toex.rs1) - P.fint(toex.rs2))};
+                man.rdwr = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) - P.fint(Action.rs2))};
                 core->cMEM.enqueue(man);
                 break;
             case 0b001: //SLL
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, toex.rs1 << (toex.rs2 & 0b11111)};
+                man.rdwr   = mempair{Action.rd, Action.rs1 << (Action.rs2 & 0b11111)};
                 core->cMEM.enqueue(man);
                 break;
             case 0b010: //SLT
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (P.fint(toex.rs1) < P.fint(toex.rs2))};
+                man.rdwr   = mempair{Action.rd, (P.fint(Action.rs1) < P.fint(Action.rs2))};
                 core->cMEM.enqueue(man);
                 break;
             case 0b011: //SLTU
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (toex.rs1 < toex.rs2)};
+                man.rdwr   = mempair{Action.rd, (Action.rs1 < Action.rs2)};
                 core->cMEM.enqueue(man);
                 break;
             case 0b100: //XOR
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, (toex.rs1 ^ toex.rs2)};
+                man.rdwr   = mempair{Action.rd, (Action.rs1 ^ Action.rs2)};
                 core->cMEM.enqueue(man);
                 break;
             case 0b101:
                 man.rdproc = false;
-                if (toex.funct7 == 0) //SRL
-                    man.rdwr = mempair{toex.rd, (toex.rs1 >> (toex.rs2 & 0b11111))};
+                if (Action.funct7 == 0) //SRL
+                    man.rdwr = mempair{Action.rd, (Action.rs1 >> (Action.rs2 & 0b11111))};
                 else //SRA
-                    man.rdwr = mempair{toex.rd, P.ftaddr(P.fint(toex.rs1) >> (toex.rs2 & 0b11111))};
+                    man.rdwr = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) >> (Action.rs2 & 0b11111))};
                 core->cMEM.enqueue(man);
                 break;
             case 0b110: //OR
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, toex.rs1 | toex.rs2};
+                man.rdwr   = mempair{Action.rd, Action.rs1 | Action.rs2};
                 core->cMEM.enqueue(man);
                 break;
             case 0b111: //AND
                 man.rdproc = false;
-                man.rdwr   = mempair{toex.rd, toex.rs1 & toex.rs2};
+                man.rdwr   = mempair{Action.rd, Action.rs1 & Action.rs2};
                 core->cMEM.enqueue(man);
                 break;
             }
@@ -411,23 +413,24 @@ int EX::tick() {
 EX::EX(core_session* c) : stage(c) {}
 
 int ID::enqueue(mempair m) {
-    decodelst.push(m);
+    ActionQueue.push(m);
     return 0;
 }
 
 int ID::tick() {
     if (stall)
         return 0;
-    if (!decodelst.empty()) {
-        getdecode = decodelst.front();
-        command C = P.Splitter(getdecode.instruction, getdecode.address);
+    if (!ActionQueue.empty()) {
+        Action    = ActionQueue.front();
+        command C = P.Splitter(Action.instruction, Action.address);
         if (!core->query(C)) {
+            core->datastallflag = false;
             core->occupy(C);
             excute ex = C;
             ex.rs1    = core->reg[C.rs1];
             ex.rs2    = core->reg[C.rs2];
             core->cEX.enqueue(ex);
-            decodelst.pop();
+            ActionQueue.pop();
         } else {
             core->datastall();
         }
@@ -458,6 +461,7 @@ void core_session::jumpstall() {
 };
 
 int core_session::term() {
+    termflag = true;
     return reg[11] & 255u;
 }
 
@@ -470,4 +474,55 @@ void core_session::datastall() {
     datastallflag = true;
     cIF.stall     = true;
     return;
+}
+
+int core_session::run() {
+    int ip = 0;
+    while (true) {
+        cWB.tick();
+        cMEM.tick();
+        ip = cEX.tick();
+        if (termflag)
+            return ip;
+        if (jumpstallflag) {
+            if (cEX.empty() && cMEM.empty() && cWB.empty()) {
+                jumpstallflag = false;
+                while (!cID.ActionQueue.empty())
+                    cID.ActionQueue.pop();
+            } else {
+                cID.stall = true;
+                cIF.stall = true;
+            }
+        } else {
+            cID.stall = false;
+            cIF.stall = false;
+        }
+        cID.tick();
+        if (datastallflag || jumpstallflag) {
+            cIF.stall = true;
+        } else {
+            cIF.stall = false;
+        }
+        cIF.tick();
+    }
+}
+
+bool IF::empty() {
+    return false;
+}
+
+bool ID::empty() {
+    return ActionQueue.empty();
+}
+
+bool EX::empty() {
+    return ActionQueue.empty();
+}
+
+bool MEM::empty() {
+    return ActionQueue.empty();
+}
+
+bool WB::empty() {
+    return ActionQueue.empty();
 }
