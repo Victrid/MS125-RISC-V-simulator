@@ -155,8 +155,7 @@ int EX::tick() {
         memmanip man;
         switch (Action.instruction) {
         case instr::T:
-            core->term();
-            break;
+            return core->term();
         case instr::B:
             switch (Action.funct3) {
             case 0b000: //BEQ
@@ -489,13 +488,10 @@ int core_session::run() {
                 jumpstallflag = false;
                 while (!cID.ActionQueue.empty())
                     cID.ActionQueue.pop();
+                cID.stall = false;
             } else {
                 cID.stall = true;
-                cIF.stall = true;
             }
-        } else {
-            cID.stall = false;
-            cIF.stall = false;
         }
         cID.tick();
         if (datastallflag || jumpstallflag) {
