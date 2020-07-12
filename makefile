@@ -1,3 +1,6 @@
+code: src/main_seq.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser.a
+	g++ -O3 -L linkfile -o code src/main_seq.cpp -lcore -lmemory -lparser
+
 linkfile:
 	mkdir linkfile
 
@@ -21,8 +24,7 @@ linkfile/libcorep.a : src/core_pipeline.cpp linkfile
 	ar rcs linkfile/libcorep.a libcorep.o
 	rm libcorep.o
 
-code: src/main_seq.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser.a
-	g++ -O3 -L linkfile -o code src/main_seq.cpp -lcore -lmemory -lparser
+# sequential test
 
 test_1: src/test1.cpp linkfile/libmemory.a linkfile/libparser.a
 	g++ -O3 -L linkfile -o test_1 src/test1.cpp -lgtest -lmemory -lparser
@@ -40,27 +42,36 @@ test_gcovr: src/test_all.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/li
 	g++ -L linkfile -fprofile-arcs -ftest-coverage -fPIC -O0 -o test_gcovr src/test_all.cpp -lcore -lmemory -lparser -lgtest
 
 .PHONY: unit_test
-unit_test: clean test_1 test_2 test_3 test_stdin
+unit_test: test_1 test_2 test_3 test_stdin
 	./test_1
 	./test_2
 	./test_3
 	./test_stdin < dataset/stdin-testset/test1.data
 
 .PHONY: unit_test_1
-unit_test_1: clean test_1
+unit_test_1: test_1
 	./test_1
 
 .PHONY: unit_test_2
-unit_test_2: clean test_2
+unit_test_2: test_2
 	./test_2
 
 .PHONY: unit_test_3
-unit_test_3: clean test_3
+unit_test_3: test_3
 	./test_3
 
 .PHONY: unit_test_stdin
-unit_test_stdin: clean test_stdin
+unit_test_stdin: test_stdin
 	./test_stdin < dataset/stdin-testset/test1.data
+
+#pipeline test
+
+test_4: src/test4.cpp linkfile/libcorep.a linkfile/libmemory.a linkfile/libparser.a
+	g++ -O3 -L linkfile -o test_4 src/test4.cpp -lgtest -lcorep -lmemory -lparser
+
+.PHONY: unit_test_4
+unit_test_4: test_4
+	./test_4
 
 .PHONY: clean
 clean:

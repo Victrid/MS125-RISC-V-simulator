@@ -3,12 +3,18 @@ core_session::core_session(const char* ch) : cWB(this), cIF(this), cID(this), cE
     memset(reg, 0, 32 * sizeof(taddr));
     memset(regoccupy, 0, 32 * sizeof(bool));
     memory.memload(ch);
+    jumpstallflag = false;
+    datastallflag = false;
+    npc           = 0;
 };
 
 core_session::core_session() : cWB(this), cIF(this), cID(this), cEX(this), cMEM(this) {
     memset(reg, 0, 32 * sizeof(taddr));
     memset(regoccupy, 0, 32 * sizeof(bool));
     memory.memload();
+    jumpstallflag = false;
+    datastallflag = false;
+    npc           = 0;
 };
 
 bool core_session::query(command toex) {
@@ -438,7 +444,30 @@ int IF::tick() {
     m.address     = core->npc;
     m.instruction = core->memory.get(core->npc);
     core->cID.enqueue(m);
+    core->npc = m.address + 4;
     return 0;
 }
 
 IF::IF(core_session* c) : stage(c){};
+
+void core_session::jumpstall() {
+    jumpstallflag = true;
+    cIF.stall     = true;
+    cID.stall     = true;
+    return;
+};
+
+int core_session::term() {
+    return reg[11] & 255u;
+}
+
+void core_session::pcmod(taddr pc) {
+    npc = pc;
+    return;
+}
+
+void core_session::datastall() {
+    datastallflag = true;
+    cIF.stall     = true;
+    return;
+}

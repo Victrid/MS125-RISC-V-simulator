@@ -65,10 +65,13 @@ public:
     void occupy(command t);
     void release(taddr t);
 
+    bool jumpstallflag;
+    bool datastallflag;
+
     void jumpstall();
     void datastall();
     void pcmod(taddr pc);
-    void term();
+    int term();
     taddr reg[32];
     taddr npc;
     Memory memory;
