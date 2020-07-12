@@ -1,0 +1,21 @@
+li a1,233
+li a1,234
+addi a1,x0,3 # Write after write. This should not be delayed.
+li x0,115
+addi a1,x0,3 # Zero should also not be delayed.
+addi a2,a1,0 # This should be delayed.
+li a1,255 #return
+
+SEQ IF  ID  EX  MEM WB
+    1
+    2   1
+    3   2   1
+    4   3   2   1
+    5   4   3   2   1
+    6   5   4   3   2
+    7   6   5   4   3   DF
+    7   6   ^   5   4   DF
+    7   6   ^   ^   5   DF
+    7   6   ^   ^   ^   DF
+        7   6   ^   ^
+            7   6   ^
