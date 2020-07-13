@@ -26,6 +26,7 @@ G(statement_test, 50);
 G(tak, 186);
 G(superloop, 134);
 G(pi, 137);
+G(heart,127);
 //ERROR
 // G(hanoi, 20);
 // G(queens, 171);
