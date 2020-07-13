@@ -487,7 +487,7 @@ int core_session::tick() {
     if (termflag) {
         if (cWB.empty() && cMEM.empty()) {
             terminated = true;
-            return reg[11] & 255u;
+            return reg[10] & 255u;
         } else {
             cEX.stall = true;
         }

@@ -189,9 +189,17 @@ TEST(TotalTest, DataHazardTest) {
     EXPECT_EQ(ret, 3);
 }
 
+TEST(TotalTest, DataHazard_Run) {
+    core_session C("dataset/pipeline-testset/test-datahazard.data");
+    EXPECT_EQ(C.run(), 3);
+}
+
+TEST(TotalTest, SampleTest) {
+    core_session C("dataset/sample.data");
+    EXPECT_EQ(C.run(), 94);
+}
+
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
-    // core_session C("dataset/pipeline-testset/test-datahazard.data");
-    // cout << C.run();
 }
