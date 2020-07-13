@@ -18,11 +18,11 @@ G(manyarguments, 40);
 G(naive, 94);
 G(tak, 186);
 G(superloop, 134);
-
-//TIME
+// G(magic, 106);
+// //TIME
 // G(basicopt1, 88);
 // G(qsort, 105);
-//G(bulgarian, 159);
+// G(bulgarian, 159);
 // G(expr, 58);
 // G(magic, 106);
 // G(multiarray, 115);

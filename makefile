@@ -88,6 +88,7 @@ clean:
 	rm -rf ./test_2
 	rm -rf ./test_3
 	rm -rf ./test_4
+	rm -rf ./test_5
 	rm -rf ./test_stdin
 	rm -rf ./code
 	rm -rf ./test_gcovr
