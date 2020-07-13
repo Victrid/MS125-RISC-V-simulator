@@ -37,8 +37,3 @@ test5:
   stage: test
   script:
     - make unit_test_5
-
-test_input:
-  stage: test
-  script:
-    - make unit_test_stdin
