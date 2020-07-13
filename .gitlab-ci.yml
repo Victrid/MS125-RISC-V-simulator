@@ -33,14 +33,12 @@ test4:
   script:
     - make unit_test_4
 
+test5:
+  stage: test
+  script:
+    - make unit_test_5
+
 test_input:
   stage: test
   script:
     - make unit_test_stdin
-    
-test_coverage:
-  stage: test
-  script:
-    - make test_gcovr
-    - ./test_gcovr
-    - gcovr -r .

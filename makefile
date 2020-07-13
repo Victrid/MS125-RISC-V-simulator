@@ -38,9 +38,6 @@ test_2: src/test2.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser
 test_3: src/test3.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser.a
 	g++ -O3 -L linkfile -o test_3 src/test3.cpp -lgtest -lcore -lmemory -lparser
 
-test_gcovr: src/test_all.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser.a
-	g++ -L linkfile -fprofile-arcs -ftest-coverage -fPIC -O0 -o test_gcovr src/test_all.cpp -lcore -lmemory -lparser -lgtest
-
 .PHONY: unit_test
 unit_test: test_1 test_2 test_3 test_stdin
 	./test_1
