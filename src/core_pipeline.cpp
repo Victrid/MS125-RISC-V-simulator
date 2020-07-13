@@ -6,6 +6,7 @@ core_session::core_session(const char* ch) : cWB(this), cIF(this), cID(this), cE
     jumpstallflag = false;
     datastallflag = false;
     termflag      = false;
+    terminated    = false;
     npc           = 0;
 };
 
@@ -16,6 +17,7 @@ core_session::core_session() : cWB(this), cIF(this), cID(this), cEX(this), cMEM(
     jumpstallflag = false;
     datastallflag = false;
     termflag      = false;
+    terminated    = false;
     npc           = 0;
 };
 
@@ -349,7 +351,7 @@ int EX::tick() {
             break;
         case instr::Ij: //JALR
             core->jumpstall();
-            core->pcmod(Action.addr + P.fint(Action.imm));
+            core->pcmod(Action.rs1 + P.fint(Action.imm));
             man.rdproc = true;
             man.rdwr   = mempair{Action.rd, Action.addr + 4};
             core->cMEM.enqueue(man);
@@ -484,6 +486,7 @@ int core_session::tick() {
     cMEM.tick();
     if (termflag) {
         if (cWB.empty() && cMEM.empty()) {
+            terminated = true;
             return reg[11] & 255u;
         } else {
             cEX.stall = true;
@@ -491,7 +494,7 @@ int core_session::tick() {
     }
     ip = cEX.tick();
     if (termflag || jumpstallflag) {
-        if ((!termflag) || (cEX.empty() && cMEM.empty() && cWB.empty())) {
+        if (cEX.empty() && cMEM.empty() && cWB.empty()) {
             jumpstallflag = false;
             while (!cID.ActionQueue.empty())
                 cID.ActionQueue.pop();
@@ -499,6 +502,8 @@ int core_session::tick() {
         } else {
             cID.stall = true;
         }
+        if (termflag)
+            cID.stall = true;
     }
     cID.tick();
     if (termflag || datastallflag || jumpstallflag) {
@@ -514,7 +519,7 @@ int core_session::run() {
     int ip = 0;
     while (true) {
         ip = tick();
-        if (termflag)
+        if (terminated)
             return ip;
     }
 }

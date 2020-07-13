@@ -75,6 +75,7 @@ public:
     bool jumpstallflag;
     bool datastallflag;
     bool termflag;
+    bool terminated;
 
     void jumpstall();
     void datastall();
