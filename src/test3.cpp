@@ -28,8 +28,8 @@ G(superloop, 134);
 G(pi, 137);
 G(heart, 127);
 //ERROR
-// G(hanoi, 20);
-// G(queens, 171);
+G(hanoi, 20);
+G(queens, 171);
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);

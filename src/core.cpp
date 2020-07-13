@@ -263,7 +263,7 @@ int core_session::tick() {
                 mmod.content = mmod.content & 0xFFFFFFFF;
                 break;
             }
-            M.get(mmod.addr) = P.rearrange(mask | mmod.content);
+            M.load(mmod.addr,P.rearrange(mask | mmod.content));
             fmemory          = 0;
         } else {
             taddr mask = P.rearrange(M.get(mreq.addr));

@@ -1,21 +1,28 @@
 #include "memory.hpp"
 
 int Memory::load(taddr address, taddr c) {
-    if (page.find(address / 0x1000) == page.end()) {
-        page.insert(pair<taddr, taddr*>(address / 0x1000, new taddr[0x1000]()));
-    }
-    page[address / 0x1000][address % 0x1000] = c;
+    pagetest(address);
+    page[address / 0x1000][address % 0x1000]             = Parser::getdigits(c, 23, 31);
+    page[(address + 1) / 0x1000][(address + 1) % 0x1000] = Parser::getdigits(c, 15, 23);
+    page[(address + 2) / 0x1000][(address + 2) % 0x1000] = Parser::getdigits(c, 7, 15);
+    page[(address + 3) / 0x1000][(address + 3) % 0x1000] = Parser::getdigits(c, -1, 7);
     return 0;
 }
 
-taddr& Memory::get(taddr address) {
+taddr Memory::get(taddr address) {
     pagetest(address);
-    return page[address / 0x1000][address % 0x1000];
+    return ((taddr)page[address / 0x1000][address % 0x1000]) << 24 |
+           ((taddr)page[(address + 1) / 0x1000][(address + 1) % 0x1000]) << 16 |
+           ((taddr)page[(address + 2) / 0x1000][(address + 2) % 0x1000]) << 8 |
+           ((taddr)page[(address + 3) / 0x1000][(address + 3) % 0x1000]);
 }
 
 void Memory::pagetest(taddr address) {
     if (page.find(address / 0x1000) == page.end()) {
-        page.insert(pair<taddr, taddr*>(address / 0x1000, new taddr[0x1000]()));
+        page.insert(pair<taddr, unsigned char*>(address / 0x1000, new unsigned char[0x1000]()));
+    }
+    if (page.find((address + 4) / 0x1000) == page.end()) {
+        page.insert(pair<taddr, unsigned char*>((address + 4) / 0x1000, new unsigned char[0x1000]()));
     }
 }
 

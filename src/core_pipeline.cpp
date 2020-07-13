@@ -122,7 +122,7 @@ int MEM::tick() {
                 Action.content = Action.content & 0xFFFFFFFF;
                 break;
             }
-            core->memory.get(Action.address) = P.rearrange(mask | Action.content);
+            core->memory.load(Action.address,P.rearrange(mask | Action.content));
         } else {
             taddr mask = P.rearrange(core->memory.get(Action.address));
             switch (Action.bits) {

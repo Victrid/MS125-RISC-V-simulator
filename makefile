@@ -29,9 +29,6 @@ linkfile/libcorep.a : src/core_pipeline.cpp linkfile
 test_1: src/test1.cpp linkfile/libmemory.a linkfile/libparser.a
 	g++ -O3 -L linkfile -o test_1 src/test1.cpp -lgtest -lmemory -lparser
 
-test_stdin: src/test1_stdin.cpp linkfile/libmemory.a linkfile/libparser.a
-	g++ -O3 -L linkfile -o test_stdin src/test1_stdin.cpp -lgtest -lmemory -lparser
-
 test_2: src/test2.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser.a
 	g++ -O3 -L linkfile -o test_2 src/test2.cpp -lgtest -lcore -lmemory -lparser
 
@@ -39,11 +36,10 @@ test_3: src/test3.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser
 	g++ -O3 -L linkfile -o test_3 src/test3.cpp -lgtest -lcore -lmemory -lparser
 
 .PHONY: unit_test
-unit_test: test_1 test_2 test_3 test_4 test_5 test_stdin
+unit_test: test_1 test_2 test_3 test_4 test_5
 	./test_1
 	./test_2
 	./test_3
-	./test_stdin < dataset/stdin-testset/test1.data
 	./test_4
 	./test_5
 
@@ -58,10 +54,6 @@ unit_test_2: test_2
 .PHONY: unit_test_3
 unit_test_3: test_3
 	./test_3
-
-.PHONY: unit_test_stdin
-unit_test_stdin: test_stdin
-	./test_stdin < dataset/stdin-testset/test1.data
 
 #pipeline test
 
@@ -87,7 +79,6 @@ clean:
 	rm -rf ./test_3
 	rm -rf ./test_4
 	rm -rf ./test_5
-	rm -rf ./test_stdin
 	rm -rf ./code
 	rm -rf ./test_gcovr
 	rm -rf ./*.gcda

@@ -346,46 +346,33 @@ TEST(ParserTest, Splitter_Term) {
     EXPECT_EQ(z.instruction, instr::T);
 }
 
-TEST(MemTest, Loadtest) {
-    loader l("dataset/array_test2.data");
-    Memory M;
-    mempair m = l.getline();
-    while (m.instruction != 0) {
-        M.load(m.address, m.instruction);
-        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000], m.instruction);
-        m = l.getline();
-    }
-}
+// TEST(MemTest, Loadtest) {
+//     loader l("dataset/array_test2.data");
+//     Memory M;
+//     mempair m = l.getline();
+//     while (m.instruction != 0) {
+//         M.load(m.address, m.instruction);
+//         EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000], m.instruction);
+//         m = l.getline();
+//     }
+// }
 
-TEST(MemTest, Loadtest_2) {
-    loader l("dataset/hanoi.data");
-    Memory M;
-    mempair m = l.getline();
-    while (m.instruction != 0) {
-        M.load(m.address, m.instruction);
-        EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000], m.instruction);
-        m = l.getline();
-    }
-}
+// TEST(MemTest, Loadtest_2) {
+//     loader l("dataset/hanoi.data");
+//     Memory M;
+//     mempair m = l.getline();
+//     while (m.instruction != 0) {
+//         M.load(m.address, m.instruction);
+//         EXPECT_EQ(M.page[m.address / 0x1000][m.address % 0x1000], m.instruction);
+//         m = l.getline();
+//     }
+// }
 
 TEST(MemTest, MemLoad_get_test) {
     Memory M;
     M.memload("dataset/hanoi.data");
     EXPECT_EQ(M.get(0x0000123c), 0x6D6F7665);
-    EXPECT_EQ(M.get(0x00001240), 0x20000000);
-    EXPECT_EQ(M.get(0x00001244), 0x202D2D3E);
-    EXPECT_EQ(M.get(0x00001248), 0x20000000);
-    EXPECT_EQ(M.get(0x0000124C), 0xFD000000);
-    EXPECT_EQ(M.get(0x0000123c), 0x6D6F7665);
-    EXPECT_EQ(M.get(0x00001240), 0x20000000);
-    EXPECT_EQ(M.get(0x00001244), 0x202D2D3E);
-    EXPECT_EQ(M.get(0x00001248), 0x20000000);
-    EXPECT_EQ(M.get(0x0000124C), 0xFD000000);
-    EXPECT_EQ(M.get(0x0000123c), 0x6D6F7665);
-    EXPECT_EQ(M.get(0x00001240), 0x20000000);
-    EXPECT_EQ(M.get(0x00001244), 0x202D2D3E);
-    EXPECT_EQ(M.get(0x00001248), 0x20000000);
-    EXPECT_EQ(M.get(0x0000124C), 0xFD000000);
+    EXPECT_EQ(M.get(0x0000123d), 0x6F766520);
 }
 
 TEST(MemTest, MemLoad_get_test_2) {

@@ -19,9 +19,9 @@ public:
 
 class Memory {
 public:
-    map<taddr, taddr*> page;
+    map<taddr, unsigned char*> page;
     int load(taddr address, taddr c);
-    taddr& get(taddr address);
+    taddr get(taddr address);
     void pagetest(taddr address);
     int memload(const char* c);
     int memload();
