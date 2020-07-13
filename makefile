@@ -39,12 +39,13 @@ test_3: src/test3.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser
 	g++ -O3 -L linkfile -o test_3 src/test3.cpp -lgtest -lcore -lmemory -lparser
 
 .PHONY: unit_test
-unit_test: test_1 test_2 test_3 test_stdin
+unit_test: test_1 test_2 test_3 test_4 test_5 test_stdin
 	./test_1
 	./test_2
 	./test_3
 	./test_stdin < dataset/stdin-testset/test1.data
 	./test_4
+	./test_5
 
 .PHONY: unit_test_1
 unit_test_1: test_1

@@ -50,33 +50,33 @@ int core_session::tick() {
             switch (C.funct3) {
             case 0b000: //BEQ
                 if (rs1 == rs2)
-                    mod_pc = pc + P.fint(imm);
+                    mod_pc = pc + imm;
                 break;
             case 0b001: //BNE
                 if (rs1 != rs2)
-                    mod_pc = pc + P.fint(imm);
+                    mod_pc = pc + imm;
                 break;
             case 0b100: //BLT
-                if (P.fint(rs1) < P.fint(rs2))
-                    mod_pc = pc + P.fint(imm);
+                if ((int)rs1 < (int)rs2)
+                    mod_pc = pc + imm;
                 break;
             case 0b101: //BGE
-                if (P.fint(rs1) >= P.fint(rs2))
-                    mod_pc = pc + P.fint(imm);
+                if ((int)rs1 >= (int)rs2)
+                    mod_pc = pc + imm;
                 break;
             case 0b110: //BLTU
                 if (rs1 < rs2)
-                    mod_pc = pc + P.fint(imm);
+                    mod_pc = pc + imm;
                 break;
             case 0b111: //BGEU
                 if (rs1 >= rs2)
-                    mod_pc = pc + P.fint(imm);
+                    mod_pc = pc + imm;
                 break;
             }
             break;
         case instr::J: //JAL
             ex_result = pc + 4;
-            mod_pc    = pc + P.fint(imm);
+            mod_pc    = pc + imm;
             frd       = true;
             break;
         case instr::U: //LUI
@@ -92,17 +92,17 @@ int core_session::tick() {
             fmemory = 1;
             switch (C.funct3) {
             case 0b000: //SB
-                mmod.addr    = rs1 + P.fint(imm);
+                mmod.addr    = rs1 + (int)imm;
                 mmod.bits    = 8;
                 mmod.content = rs2;
                 break;
             case 0b001: //SH
-                mmod.addr    = rs1 + P.fint(imm);
+                mmod.addr    = rs1 + (int)imm;
                 mmod.bits    = 16;
                 mmod.content = rs2;
                 break;
             case 0b010: //SW
-                mmod.addr    = rs1 + P.fint(imm);
+                mmod.addr    = rs1 + (int)imm;
                 mmod.bits    = 32;
                 mmod.content = rs2;
                 break;
@@ -110,34 +110,34 @@ int core_session::tick() {
             break;
         case instr::Il:
             fmemory = -1;
-            P.padimm(imm, 12);
+            // P.padimm(imm, 12);
             switch (C.funct3) { //LB
             case 0b000:
-                mreq.addr = rs1 + P.fint(imm);
+                mreq.addr = rs1 + (int)imm;
                 mreq.bits = 8;
                 mreq.regp = C.rd;
                 mreq.sign = true;
                 break;
             case 0b001: //LH
-                mreq.addr = rs1 + P.fint(imm);
+                mreq.addr = rs1 + (int)imm;
                 mreq.bits = 16;
                 mreq.regp = C.rd;
                 mreq.sign = true;
                 break;
             case 0b010: //LW
-                mreq.addr = rs1 + P.fint(imm);
+                mreq.addr = rs1 + (int)imm;
                 mreq.bits = 32;
                 mreq.regp = C.rd;
                 mreq.sign = true;
                 break;
             case 0b100: //LBU
-                mreq.addr = rs1 + P.fint(imm);
+                mreq.addr = rs1 + (int)imm;
                 mreq.bits = 8;
                 mreq.regp = C.rd;
                 mreq.sign = false;
                 break;
             case 0b101: //LHU
-                mreq.addr = rs1 + P.fint(imm);
+                mreq.addr = rs1 + (int)imm;
                 mreq.bits = 16;
                 mreq.regp = C.rd;
                 mreq.sign = false;
@@ -151,59 +151,60 @@ int core_session::tick() {
         case instr::I:
             switch (C.funct3) {
             case 0b000: //ADDI
-                ex_result = P.ftaddr(P.fint(rs1) + P.fint(imm));
+                // P.padimm(imm, 12);
+                ex_result = (taddr)((int)rs1 + (int)imm);
                 frd       = true;
                 break;
             case 0b010: //SLTI
-                P.padimm(imm, 12);
-                ex_result = (P.fint(rs1) < P.fint(imm));
+                // P.padimm(imm, 12);
+                ex_result = ((int)rs1 < (int)imm);
                 frd       = true;
                 break;
             case 0b011: //SLTIU
-                P.padimm(imm, 12);
+                // P.padimm(imm, 12);
                 ex_result = (rs1 < imm);
                 frd       = true;
                 break;
             case 0b100: //XORI
-                P.padimm(imm, 12);
+                // P.padimm(imm, 12);
                 ex_result = rs1 ^ imm;
                 frd       = true;
                 break;
             case 0b110: //ORI
-                P.padimm(imm, 12);
+                // P.padimm(imm, 12);
                 ex_result = rs1 | imm;
                 frd       = true;
                 break;
             case 0b111: //ANDI
-                P.padimm(imm, 12);
+                // P.padimm(imm, 12);
                 ex_result = rs1 & imm;
                 frd       = true;
                 break;
             case 0b001: //SLLI
-                ex_result = rs1 << imm;
+                ex_result = rs1 << (imm & (unsigned)0b11111);
                 frd       = true;
                 break;
             case 0b101:
                 if (C.funct7 == 0) //SRLI
-                    ex_result = rs1 >> imm;
+                    ex_result = rs1 >> (imm & (unsigned)0b11111);
                 else //SRAI
-                    ex_result = P.ftaddr(P.fint(rs1) >> imm);
+                    ex_result = (taddr)((int)rs1 >> (imm & (unsigned)0b11111));
                 frd = true;
                 break;
             }
             break;
         case instr::Ij: //JALR
             ex_result = pc + 4;
-            mod_pc    = rs1 + P.fint(imm);
+            mod_pc    = (rs1 + imm) & (~0x1);
             frd       = true;
             break;
         case instr::R:
             switch (C.funct3) {
             case 0b000:
                 if (C.funct7 == 0) //ADD
-                    ex_result = P.ftaddr(P.fint(rs1) + P.fint(rs2));
+                    ex_result = rs1 + rs2;
                 else //SUB
-                    ex_result = P.ftaddr(P.fint(rs1) - P.fint(rs2));
+                    ex_result = rs1 - rs2;
                 frd = true;
                 break;
             case 0b001: //SLL
@@ -211,7 +212,7 @@ int core_session::tick() {
                 frd       = true;
                 break;
             case 0b010: //SLT
-                ex_result = (P.fint(rs1) < P.fint(rs2));
+                ex_result = ((int)rs1 < (int)rs2);
                 frd       = true;
                 break;
             case 0b011: //SLTU
@@ -224,9 +225,9 @@ int core_session::tick() {
                 break;
             case 0b101:
                 if (C.funct7 == 0) //SRL
-                    ex_result = rs1 >> (rs2 & 0b11111);
+                    ex_result = rs1 >> (rs2 & (unsigned)0b11111);
                 else //SRA
-                    ex_result = P.ftaddr(P.fint(rs1) >> (rs2 & 0b11111));
+                    ex_result = (taddr)((int)rs1 >> (rs2 & (unsigned)0b11111));
                 frd = true;
                 break;
             case 0b110: //OR
@@ -302,22 +303,24 @@ int core_session::tick() {
     return (fterm);
 }
 ostream& core_session::printmem(ostream& os) {
-    cout << "\x1B[2J\x1B[H";
+    // cout << "\x1B[2J\x1B[H";
+    cout << std::hex << pc << endl;
     for (int i = 0; i < 4; i++) {
+        // for (int j = 0; j < 8; j++) {
+        //     cout << "x" << std::dec << i * 8 + j << "\t";
+        // }
+
+        cout << std::hex;
         for (int j = 0; j < 8; j++) {
-            cout << "x" << std::dec << i * 8 + j << "\t";
-        }
-        cout << std::hex << endl;
-        for (int j = 0; j < 8; j++) {
-            cout << reg[i * 8 + j] << "\t";
+            cout << reg[i * 8 + j] << " ";
         }
         cout << endl;
     }
-    const char* roundc[] = {"WB", "IF", "ID", "EX", "MEM-1", "MEM-2", "MEM-3"};
-    cout << "PC\t\t0x" << std::hex << pc << "\tMEMF\t\t" << fmemory << endl;
-    cout << "MEM\t\t0x" << std::hex << loaded_memory << "\t" << roundc[round] << endl;
-    cout << "ASM \t\t";
-    P.displayer(C, cout) << endl;
+    // const char* roundc[] = {"WB", "IF", "ID", "EX", "MEM-1", "MEM-2", "MEM-3"};
+    // cout << "PC\t\t0x" << std::hex << pc << "\tMEMF\t\t" << fmemory << endl;
+    // cout << "MEM\t\t0x" << std::hex << loaded_memory << "\t" << roundc[round] << endl;
+    // cout << "ASM \t\t";
+    // P.displayer(C, cout) << endl;
     return os;
 }
 int core_session::cycle() {
@@ -340,11 +343,14 @@ int core_session::debug_run() {
     unsigned vvred = 0;
     while (!tickret) {
         tickret = cycle();
-        // printmem(cout);
-        // // if (pc == 0x118c || pc == 0x1190 || pc == 0x1194 || pc == 0x1198)
-        // //     ;
-        // // else
-        // c = getchar();
+        printmem(cout);
+        if (M.get(0x123c) != 0x6D6F7665) {
+            cout << pc;
+            throw exception();
+        }
+        // if (pc == 0x118c || pc == 0x1190 || pc == 0x1194 || pc == 0x1198)
+        //     ;
+        // else
     }
     return retval;
 }
