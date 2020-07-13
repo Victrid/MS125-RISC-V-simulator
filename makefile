@@ -70,9 +70,17 @@ unit_test_stdin: test_stdin
 test_4: src/test4.cpp linkfile/libcorep.a linkfile/libmemory.a linkfile/libparser.a
 	g++ -O0 -g -L linkfile -o test_4 src/test4.cpp -lgtest -lcorep -lmemory -lparser
 
+test_5: src/test5.cpp linkfile/libcorep.a linkfile/libmemory.a linkfile/libparser.a
+	g++ -O0 -g -L linkfile -o test_5 src/test5.cpp -lgtest -lcorep -lmemory -lparser
+
 .PHONY: unit_test_4
 unit_test_4: test_4
 	./test_4
+
+.PHONY: unit_test_5
+unit_test_5: test_5
+	./test_5
+
 
 .PHONY: clean
 clean:
