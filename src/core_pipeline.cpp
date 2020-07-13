@@ -1,7 +1,7 @@
 #include "core_pipeline.hpp"
 core_session::core_session(const char* ch) : cWB(this), cIF(this), cID(this), cEX(this), cMEM(this) {
     memset(reg, 0, 32 * sizeof(taddr));
-    memset(regoccupy, 0, 32 * sizeof(bool));
+    memset(regoccupy, 0, 32 * sizeof(int));
     memory.memload(ch);
     jumpstallflag = false;
     datastallflag = false;
@@ -11,7 +11,7 @@ core_session::core_session(const char* ch) : cWB(this), cIF(this), cID(this), cE
 
 core_session::core_session() : cWB(this), cIF(this), cID(this), cEX(this), cMEM(this) {
     memset(reg, 0, 32 * sizeof(taddr));
-    memset(regoccupy, 0, 32 * sizeof(bool));
+    memset(regoccupy, 0, 32 * sizeof(int));
     memory.memload();
     jumpstallflag = false;
     datastallflag = false;
@@ -56,14 +56,14 @@ void core_session::occupy(command toex) {
     case instr::Ij:
     case instr::J: //JAL
         if (toex.rd)
-            regoccupy[toex.rd] = true;
+            regoccupy[toex.rd]++;
         return;
     }
 }
 
 void core_session::release(taddr t) {
     if (t)
-        regoccupy[t] = false;
+        regoccupy[t]--;
     return;
 }
 
@@ -464,7 +464,7 @@ void core_session::jumpstall() {
 
 int core_session::term() {
     termflag = true;
-    return reg[11] & 255u;
+    return 0;
 }
 
 void core_session::pcmod(taddr pc) {
@@ -482,11 +482,16 @@ int core_session::tick() {
     int ip = 0;
     cWB.tick();
     cMEM.tick();
+    if (termflag) {
+        if (cWB.empty() && cMEM.empty()) {
+            return reg[11] & 255u;
+        } else {
+            cEX.stall = true;
+        }
+    }
     ip = cEX.tick();
-    if (termflag)
-        return ip;
-    if (jumpstallflag) {
-        if (cEX.empty() && cMEM.empty() && cWB.empty()) {
+    if (termflag || jumpstallflag) {
+        if ((!termflag) || (cEX.empty() && cMEM.empty() && cWB.empty())) {
             jumpstallflag = false;
             while (!cID.ActionQueue.empty())
                 cID.ActionQueue.pop();
@@ -496,7 +501,7 @@ int core_session::tick() {
         }
     }
     cID.tick();
-    if (datastallflag || jumpstallflag) {
+    if (termflag || datastallflag || jumpstallflag) {
         cIF.stall = true;
     } else {
         cIF.stall = false;

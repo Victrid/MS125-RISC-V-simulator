@@ -84,7 +84,7 @@ public:
     taddr npc;
     Memory memory;
 
-    bool regoccupy[32];
+    int regoccupy[32];
 
     WB cWB;
     MEM cMEM;

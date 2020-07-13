@@ -141,39 +141,53 @@ TEST(StageTest, WBTest) {
     C.cWB.tick();
     EXPECT_EQ(C.reg[0], 0);
     C.cWB.ActionQueue.push(mempair{0x1, 0x5});
-    C.regoccupy[1] = true;
+    C.regoccupy[1] = 1;
     C.cWB.tick();
     EXPECT_EQ(C.reg[1], 5);
-    EXPECT_FALSE(C.regoccupy[1]);
+    EXPECT_EQ(C.regoccupy[1], 0);
 }
 
-// TEST(TotalTest, Test1) {
-//     core_session C("dataset/pipeline-testset/test-datahazard.data");
-//     C.tick();
-//     EXPECT_FALSE(C.datastallflag);
-//     C.tick();
-//     EXPECT_FALSE(C.datastallflag);
-//     C.tick();
-//     EXPECT_FALSE(C.datastallflag);
-//     C.tick();
-//     EXPECT_FALSE(C.datastallflag);
-//     C.tick();
-//     EXPECT_FALSE(C.datastallflag);
-//     C.tick();
-//     EXPECT_FALSE(C.datastallflag);
-//     C.tick();
-//     EXPECT_TRUE(C.datastallflag);
-//     C.tick();
-//     EXPECT_TRUE(C.datastallflag);
-//     C.tick();
-//     EXPECT_TRUE(C.datastallflag);
-//     C.tick();
-//     EXPECT_TRUE(C.datastallflag);
-//     C.tick();
-//     EXPECT_FALSE(C.datastallflag);
-//     C.tick();
-//     EXPECT_FALSE(C.datastallflag);
-// }
+TEST(TotalTest, DataHazardTest) {
+    core_session C("dataset/pipeline-testset/test-datahazard.data");
+    int ret;
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_TRUE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_TRUE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_FALSE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_TRUE(C.termflag);
+    ret = C.tick();
+    EXPECT_FALSE(C.datastallflag);
+    EXPECT_TRUE(C.termflag);
+    EXPECT_EQ(ret, 3);
+}
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
