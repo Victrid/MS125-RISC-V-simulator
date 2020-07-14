@@ -1,11 +1,17 @@
 # Prediction
 
-| Method |            Meaning             | Average Succeed Rate |
-| :----: | :----------------------------: | :------------------: |
-|   A    |        **A**lways taken        |        57.13%        |
-|   ~A   |    **A**lways **n**ot taken    |        42.87%        |
-|   S    |     **S**aturating counter     |        82.52%        |
-|   T8   | **T**wo-level Adaptive (8-bit) |        84.17%        |
+This is the predictor part.
+
+| Method |            Meaning            | file | Average Success Rate |
+| :----: | :----------------------------:|:-: | :------------------: |
+|   A    |        **A**lways taken       | `predictor-static.hpp` |        57.13%        |
+|   ~A   |    **A**lways **n**ot taken   | ~ |        42.87%        |
+|   S    |     **S**aturating counter    | `predictor-sature.hpp` |        82.52%        |
+|   T8   | **T**wo-level Adaptive (8-bit)| `predictor.hpp` |        84.17%        |
+
+The test result is listed below. Though the number is not much pretty in the Average Success Rate, caused by `pi`, the Two-level Adaptive training prediction method shows better results.
+
+This is the detailed datasheet.
 
 | Test Name      | Hit: A   | Hit: S   | Hit: T8  | Total    | A%     | S%     | T8%    |
 | -------------- | -------- | -------- | -------- | -------- | ------ | ------ | ------ |
