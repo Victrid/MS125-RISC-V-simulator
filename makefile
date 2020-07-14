@@ -28,6 +28,11 @@ linkfile/libcorep.a : src/core_pipeline.cpp linkfile
 	ar rcs linkfile/libcorep.a libcorep.o
 	rm libcorep.o
 
+linkfile/libcorepr.a : src/core_predictor.cpp linkfile
+	g++ -O3 -c -o libcorepr.o src/core_predictor.cpp
+	ar rcs linkfile/libcorepr.a libcorepr.o
+	rm libcorepr.o
+
 # sequential test
 
 test_1: src/test1.cpp linkfile/libmemory.a linkfile/libparser.a
@@ -75,6 +80,14 @@ unit_test_4: test_4
 unit_test_5: test_5
 	./test_5
 
+#predictor test
+
+test_6: src/test6.cpp linkfile/libcorepr.a linkfile/libmemory.a linkfile/libparser.a
+	g++ -O3 -L linkfile -o test_6 src/test6.cpp -lgtest -lcorepr -lmemory -lparser
+
+.PHONY: unit_test_6
+unit_test_6: test_6
+	./test_6
 
 .PHONY: clean
 clean:
@@ -83,6 +96,7 @@ clean:
 	rm -rf ./test_3
 	rm -rf ./test_4
 	rm -rf ./test_5
+	rm -rf ./test_6
 	rm -rf ./code
 	rm -rf ./test_gcovr
 	rm -rf ./*.gcda
