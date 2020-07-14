@@ -41,48 +41,30 @@ public:
     }
     sature() : b0(true), b1(false){};
 };
-
-class Adapttrain {
-public:
-    unsigned char HR = 0;
-    sature PT[0b11111111];
-    bool query() {
-        return PT[HR].query();
-    }
-    void validate(bool ans) {
-        if (ans)
-            PT[HR].increase();
-        else
-            PT[HR].decrease();
-        HR = (HR << 1) | (ans & 1);
-    }
-};
-
 class Predictor {
-    unordered_map<taddr, Adapttrain> strmap;
+    unordered_map<taddr, sature> strmap;
     queue<bool> predictbool;
 
 public:
-    int hit = 0;
-    int tot = 0;
     bool query(taddr address) {
         //True means jump
         if (strmap.find(address) == strmap.end())
-            strmap.insert(pair<taddr, Adapttrain>(address, Adapttrain()));
+            strmap.insert(pair<taddr, sature>(address, sature()));
         bool b = strmap[address].query();
         predictbool.push(b);
         return b;
     };
     bool validate(taddr address, bool jumped) {
-        tot++;
-        strmap[address].validate(jumped);
+        if (jumped)
+            strmap[address].increase();
+        else
+            strmap[address].decrease();
         if (predictbool.front() ^ jumped) {
             //fail to predict.
             while (!predictbool.empty())
                 predictbool.pop();
             return false;
         } else {
-            hit++;
             predictbool.pop();
             return true;
         }
