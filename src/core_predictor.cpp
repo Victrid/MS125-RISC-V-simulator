@@ -204,6 +204,8 @@ int EX::tick() {
             }
         } break;
         case instr::J: //JAL
+            core->jumpstall();
+            core->pcmod(Action.addr + P.fint(Action.imm));
             man.rdproc = true;
             man.rdwr   = mempair{Action.rd, Action.addr + 4};
             core->cMEM.enqueue(man);
@@ -361,10 +363,12 @@ int IF::tick() {
             core->npc = C.addr + P.fint(C.imm);
         else
             core->npc = m.address + 4;
+        // }
     } else if ((P.rearrange(m.instruction) & 0b1111111) == 0b1101111) {
         auto C    = P.Splitter(m.instruction, m.address);
         core->npc = C.addr + P.fint(C.imm);
     } else {
+        // else {
         core->npc = m.address + 4;
     }
     return 0;
@@ -378,6 +382,7 @@ void core_session::jumpstall() {
         cID.ActionQueue.pop();
     while (!cEX.ActionQueue.empty())
         cEX.ActionQueue.pop();
+    Pr.clear();
     return;
 };
 
@@ -410,23 +415,14 @@ int core_session::tick() {
         }
     }
     ip = cEX.tick();
-    if (termflag || jumpstallflag) {
-        if (cMEM.empty() && cWB.empty()) {
-            jumpstallflag = false;
-            cID.stall     = false;
-            memset(regoccupy, 0, 32 * sizeof(int));
-        } else {
-            cID.stall = true;
-        }
-        if (termflag)
-            cID.stall = true;
+    if (termflag)
+        cID.stall = true;
+    if (jumpstallflag && cMEM.empty() && cWB.empty()) {
+        jumpstallflag = false;
+        memset(regoccupy, 0, 32 * sizeof(int));
     }
     cID.tick();
-    if (termflag || datastallflag || jumpstallflag) {
-        cIF.stall = true;
-    } else {
-        cIF.stall = false;
-    }
+    cIF.stall = (termflag || datastallflag || jumpstallflag);
     cIF.tick();
     return 0;
 }

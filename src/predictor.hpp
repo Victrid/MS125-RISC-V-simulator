@@ -46,37 +46,32 @@ class Predictor {
     queue<bool> predictbool;
 
 public:
-    //DEBUG
-    int tot = 0;
-    int cor = 0;
     bool query(taddr address) {
         //True means jump
         if (strmap.find(address) == strmap.end())
             strmap.insert(pair<taddr, sature>(address, sature()));
         bool b = strmap[address].query();
         predictbool.push(b);
-        tot++;
         return b;
     };
     bool validate(taddr address, bool jumped) {
+        if (jumped)
+            strmap[address].increase();
+        else
+            strmap[address].decrease();
         if (predictbool.front() ^ jumped) {
             //fail to predict.
-            if (jumped)
-                strmap[address].decrease();
-            else
-                strmap[address].increase();
             while (!predictbool.empty())
                 predictbool.pop();
             return false;
         } else {
-            if (!jumped)
-                strmap[address].decrease();
-            else
-                strmap[address].increase();
             predictbool.pop();
-            cor++;
             return true;
         }
+    }
+    void clear() {
+        while (!predictbool.empty())
+            predictbool.pop();
     }
 };
 #endif

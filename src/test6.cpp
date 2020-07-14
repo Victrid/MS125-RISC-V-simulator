@@ -7,7 +7,6 @@ using namespace std;
     TEST(FileTest, AAA) {                            \
         core_session C("dataset/" #AAA ".data");     \
         EXPECT_EQ(C.run(), b);                       \
-        cout << C.Pr.cor << '/' << C.Pr.tot << endl; \
     }
 
 G(sample, 94);

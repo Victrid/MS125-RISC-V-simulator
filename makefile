@@ -1,4 +1,8 @@
-code: src/main_pip.cpp linkfile/libcorep.a linkfile/libmemory.a linkfile/libparser.a
+code: src/main_pred-sat.cpp linkfile/libcorepr.a linkfile/libmemory.a linkfile/libparser.a
+	g++ -O3 -L linkfile -o code src/main_pred-sat.cpp -lcorepr -lmemory -lparser
+
+.PHONY: code_pip
+code_pip: src/main_pip.cpp linkfile/libcorep.a linkfile/libmemory.a linkfile/libparser.a
 	g++ -O3 -L linkfile -o code src/main_pip.cpp -lcorep -lmemory -lparser
 
 .PHONY: code_seq
@@ -45,12 +49,12 @@ test_3: src/test3.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser
 	g++ -O3 -L linkfile -o test_3 src/test3.cpp -lgtest -lcore -lmemory -lparser
 
 .PHONY: unit_test
-unit_test: test_1 test_2 test_3 test_4 test_5
+unit_test: test_1 test_2 test_3 test_5 test_6
 	./test_1
 	./test_2
 	./test_3
-	./test_4
 	./test_5
+	./test_6
 
 .PHONY: unit_test_1
 unit_test_1: test_1
@@ -66,15 +70,8 @@ unit_test_3: test_3
 
 #pipeline test
 
-test_4: src/test4.cpp linkfile/libcorep.a linkfile/libmemory.a linkfile/libparser.a
-	g++ -O3 -L linkfile -o test_4 src/test4.cpp -lgtest -lcorep -lmemory -lparser
-
 test_5: src/test5.cpp linkfile/libcorep.a linkfile/libmemory.a linkfile/libparser.a
 	g++ -O3 -L linkfile -o test_5 src/test5.cpp -lgtest -lcorep -lmemory -lparser
-
-.PHONY: unit_test_4
-unit_test_4: test_4
-	./test_4
 
 .PHONY: unit_test_5
 unit_test_5: test_5
@@ -94,7 +91,6 @@ clean:
 	rm -rf ./test_1
 	rm -rf ./test_2
 	rm -rf ./test_3
-	rm -rf ./test_4
 	rm -rf ./test_5
 	rm -rf ./test_6
 	rm -rf ./code
