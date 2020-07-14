@@ -46,7 +46,7 @@ class Predictor {
     queue<bool> predictbool;
 
 public:
-//DEBUG
+    //DEBUG
     int tot = 0;
     int cor = 0;
     bool query(taddr address) {
@@ -61,12 +61,18 @@ public:
     bool validate(taddr address, bool jumped) {
         if (predictbool.front() ^ jumped) {
             //fail to predict.
-            strmap[address].decrease();
+            if (jumped)
+                strmap[address].decrease();
+            else
+                strmap[address].increase();
             while (!predictbool.empty())
                 predictbool.pop();
             return false;
         } else {
-            strmap[address].increase();
+            if (!jumped)
+                strmap[address].decrease();
+            else
+                strmap[address].increase();
             predictbool.pop();
             cor++;
             return true;
