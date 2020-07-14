@@ -34,6 +34,7 @@ public:
     int tick();
     bool empty();
     MEM(core_session* c);
+    int cycle;
 };
 
 class EX : public stage {

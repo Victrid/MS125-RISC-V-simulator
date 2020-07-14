@@ -100,10 +100,17 @@ int MEM::tick() {
     if (stall)
         return 0;
     if (!ActionQueue.empty()) {
+        //This is the 3-cycle memory read-write.
+        cycle++;
+        cycle %= 3;
+        if (cycle)
+            return 0;
         Action = ActionQueue.front();
         ActionQueue.pop();
         if (Action.rdproc) {
             core->cWB.enqueue(Action.rdwr);
+            //Non-memory only consume 1 cycle.
+            cycle = 2;
             return 0;
         }
         if (!Action.read) {
@@ -122,7 +129,7 @@ int MEM::tick() {
                 Action.content = Action.content & 0xFFFFFFFF;
                 break;
             }
-            core->memory.load(Action.address,P.rearrange(mask | Action.content));
+            core->memory.load(Action.address, P.rearrange(mask | Action.content));
         } else {
             taddr mask = P.rearrange(core->memory.get(Action.address));
             switch (Action.bits) {
@@ -145,7 +152,7 @@ int MEM::tick() {
     return 0;
 }
 
-MEM::MEM(core_session* c) : stage(c) {}
+MEM::MEM(core_session* c) : stage(c), cycle(0) {}
 
 int EX::enqueue(excute m) {
     ActionQueue.push(m);
@@ -351,9 +358,8 @@ int IF::tick() {
 IF::IF(core_session* c) : stage(c){};
 
 void core_session::jumpstall() {
-    jumpstallflag = true;
-    cIF.stall     = true;
-    cID.stall     = true;
+    while (!cID.ActionQueue.empty())
+        cID.ActionQueue.pop();
     return;
 };
 
@@ -386,21 +392,13 @@ int core_session::tick() {
         }
     }
     ip = cEX.tick();
-    if (termflag || jumpstallflag) {
-        if (cEX.empty() && cMEM.empty() && cWB.empty()) {
-            jumpstallflag = false;
-            while (!cID.ActionQueue.empty())
-                cID.ActionQueue.pop();
-            cID.stall = false;
-            memset(regoccupy, 0, 32 * sizeof(int));
-        } else {
-            cID.stall = true;
-        }
-        if (termflag)
-            cID.stall = true;
+    if (termflag) {
+        cID.stall = true;
+    } else {
+        cID.stall = false;
     }
     cID.tick();
-    if (termflag || datastallflag || jumpstallflag) {
+    if (termflag || datastallflag) {
         cIF.stall = true;
     } else {
         cIF.stall = false;
