@@ -1,4 +1,8 @@
-code: src/main_seq.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser.a
+code: src/main_pip.cpp linkfile/libcorep.a linkfile/libmemory.a linkfile/libparser.a
+	g++ -O3 -L linkfile -o code src/main_pip.cpp -lcorep -lmemory -lparser
+
+.PHONY: code_seq
+code_seq: src/main_seq.cpp linkfile/libcore.a linkfile/libmemory.a linkfile/libparser.a
 	g++ -O3 -L linkfile -o code src/main_seq.cpp -lcore -lmemory -lparser
 
 linkfile:
