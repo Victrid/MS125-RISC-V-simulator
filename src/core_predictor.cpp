@@ -373,8 +373,11 @@ int IF::tick() {
 IF::IF(core_session* c) : stage(c){};
 
 void core_session::jumpstall() {
+    jumpstallflag = true;
     while (!cID.ActionQueue.empty())
         cID.ActionQueue.pop();
+    while (!cEX.ActionQueue.empty())
+        cEX.ActionQueue.pop();
     return;
 };
 
@@ -407,13 +410,19 @@ int core_session::tick() {
         }
     }
     ip = cEX.tick();
-    if (termflag) {
-        cID.stall = true;
-    } else {
-        cID.stall = false;
+    if (termflag || jumpstallflag) {
+        if (cMEM.empty() && cWB.empty()) {
+            jumpstallflag = false;
+            cID.stall     = false;
+            memset(regoccupy, 0, 32 * sizeof(int));
+        } else {
+            cID.stall = true;
+        }
+        if (termflag)
+            cID.stall = true;
     }
     cID.tick();
-    if (termflag || datastallflag) {
+    if (termflag || datastallflag || jumpstallflag) {
         cIF.stall = true;
     } else {
         cIF.stall = false;
