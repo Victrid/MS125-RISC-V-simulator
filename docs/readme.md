@@ -12,7 +12,7 @@ This is the documentation folder. See these files in the directory below.
 
   
 
-- [riscv-asm.md](riscv-asm.md) Written by Palmer Dabbelt, et al., introducing RISC-V assembly.
+- [riscv-asm.md](riscv-asm.md) Written by Palmer Dabbelt, et al., introducing RISC-V assembly. (Translated to Chinese)
 
 - [gtest.md](gtest.md) short introduction to gtest framework.
 
