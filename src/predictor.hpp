@@ -5,8 +5,6 @@
 #include <queue>
 #include <unordered_map>
 
-using namespace std;
-
 class sature {
 private:
     bool b0;
@@ -59,8 +57,8 @@ public:
 };
 
 class Predictor {
-    unordered_map<taddr, Adapttrain> strmap;
-    queue<bool> predictbool;
+    std::unordered_map<taddr, Adapttrain> strmap;
+    std::queue<bool> predictbool;
 
 public:
     int hit = 0;
@@ -68,7 +66,7 @@ public:
     bool query(taddr address) {
         //True means jump
         if (strmap.find(address) == strmap.end())
-            strmap.insert(pair<taddr, Adapttrain>(address, Adapttrain()));
+            strmap.insert(std::pair<taddr, Adapttrain>(address, Adapttrain()));
         bool b = strmap[address].query();
         predictbool.push(b);
         return b;

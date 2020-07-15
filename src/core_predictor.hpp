@@ -18,7 +18,7 @@ public:
 
 class WB : public stage {
 public:
-    queue<mempair> ActionQueue;
+    std::queue<mempair> ActionQueue;
     mempair Action;
     int enqueue(mempair m);
     int tick();
@@ -29,7 +29,7 @@ public:
 class MEM : public stage {
 public:
     Parser P;
-    queue<memmanip> ActionQueue;
+    std::queue<memmanip> ActionQueue;
     memmanip Action;
     int enqueue(memmanip m);
     int tick();
@@ -41,7 +41,7 @@ public:
 class EX : public stage {
 public:
     Parser P;
-    queue<excute> ActionQueue;
+    std::queue<excute> ActionQueue;
     excute Action;
     int enqueue(excute m);
     int tick();
@@ -53,7 +53,7 @@ class ID : public stage {
     Parser P;
 
 public:
-    queue<mempair> ActionQueue;
+    std::queue<mempair> ActionQueue;
     mempair Action;
     int enqueue(mempair m);
     int tick();

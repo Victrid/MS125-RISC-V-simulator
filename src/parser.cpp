@@ -145,7 +145,7 @@ command Parser::JSplitter(unsigned int operation, unsigned int baseaddr) {
     return c;
 }
 
-ostream& Parser::displayer(command& z, ostream& os) {
+std::ostream& Parser::displayer(command& z, std::ostream& os) {
     const char* cc[] = {
         "R ",
         "I ",
@@ -192,6 +192,8 @@ ostream& Parser::displayer(command& z, ostream& os) {
     // os << std::hex << z.addr << '\t';
     // os << cc[z.instruction] << ' ';
     switch (z.instruction) {
+    case instr::T:
+        return os; 
     case instr::B:
         switch (z.funct3) {
         case 0b000:

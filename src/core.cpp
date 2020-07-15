@@ -302,19 +302,19 @@ int core_session::tick() {
     round %= 7;
     return (fterm);
 }
-ostream& core_session::printmem(ostream& os) {
+std::ostream& core_session::printmem(std::ostream& os) {
     // cout << "\x1B[2J\x1B[H";
-    cout << std::hex << pc << endl;
+    std::cout << std::hex << pc << std::endl;
     for (int i = 0; i < 4; i++) {
         // for (int j = 0; j < 8; j++) {
         //     cout << "x" << std::dec << i * 8 + j << "\t";
         // }
 
-        cout << std::hex;
+        std::cout << std::hex;
         for (int j = 0; j < 8; j++) {
-            cout << reg[i * 8 + j] << " ";
+            std::cout << reg[i * 8 + j] << " ";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
     // const char* roundc[] = {"WB", "IF", "ID", "EX", "MEM-1", "MEM-2", "MEM-3"};
     // cout << "PC\t\t0x" << std::hex << pc << "\tMEMF\t\t" << fmemory << endl;
@@ -343,10 +343,10 @@ int core_session::debug_run() {
     unsigned vvred = 0;
     while (!tickret) {
         tickret = cycle();
-        printmem(cout);
+        printmem(std::cout);
         if (M.get(0x123c) != 0x6D6F7665) {
-            cout << pc;
-            throw exception();
+            std::cout << pc;
+            throw std::exception();
         }
         // if (pc == 0x118c || pc == 0x1190 || pc == 0x1194 || pc == 0x1198)
         //     ;

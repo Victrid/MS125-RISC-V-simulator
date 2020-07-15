@@ -4,22 +4,20 @@
 #include "parser.hpp"
 #include <iostream>
 #include <map>
-#include <vector>
-using namespace std;
 class loader {
 public:
-    istream* file;
+    std::istream* file;
     taddr baseaddr;
     char inputline[100];
     int hextoint(char c);
     mempair getline();
     loader(const char* filepath);
-    loader() : file() { file = &cin; }
+    loader() : file() { file = &std::cin; }
 };
 
 class Memory {
 public:
-    map<taddr, unsigned char*> page;
+    std::map<taddr, unsigned char*> page;
     int load(taddr address, taddr c);
     taddr get(taddr address);
     void pagetest(taddr address);

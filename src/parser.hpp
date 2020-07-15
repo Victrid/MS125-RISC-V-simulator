@@ -7,7 +7,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-using namespace std;
 
 class Parser {
 public:
@@ -25,7 +24,7 @@ public:
     static command USplitter(taddr operation, taddr baseaddr);
     static command BSplitter(taddr operation, taddr baseaddr);
     static command JSplitter(taddr operation, taddr baseaddr);
-    static ostream& displayer(command& c, ostream& os);
+    static std::ostream& displayer(command& c, std::ostream& os);
     Parser(){};
 };
 

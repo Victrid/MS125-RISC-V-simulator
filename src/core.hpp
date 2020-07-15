@@ -50,7 +50,7 @@ public:
     } mreq;
     core_session(const char* c);
     core_session();
-    ostream& printmem(ostream& os);
+    std::ostream& printmem(std::ostream& os);
     int tick();
     int cycle();
     int run();

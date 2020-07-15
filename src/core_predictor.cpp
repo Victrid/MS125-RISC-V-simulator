@@ -442,7 +442,7 @@ int core_session::debug_run() {
         ip = tick();
         if (terminated)
             return ip;
-        cout << hex << npc << endl;
+        std::cout << std::hex << npc << std::endl;
     }
 }
 

@@ -19,10 +19,10 @@ taddr Memory::get(taddr address) {
 
 void Memory::pagetest(taddr address) {
     if (page.find(address / 0x1000) == page.end()) {
-        page.insert(pair<taddr, unsigned char*>(address / 0x1000, new unsigned char[0x1000]()));
+        page.insert(std::pair<taddr, unsigned char*>(address / 0x1000, new unsigned char[0x1000]()));
     }
     if (page.find((address + 4) / 0x1000) == page.end()) {
-        page.insert(pair<taddr, unsigned char*>((address + 4) / 0x1000, new unsigned char[0x1000]()));
+        page.insert(std::pair<taddr, unsigned char*>((address + 4) / 0x1000, new unsigned char[0x1000]()));
     }
 }
 
@@ -75,7 +75,7 @@ int loader::hextoint(char c) {
         return c - 'A' + 10;
 }
 
-loader::loader(const char* filepath) : file(new fstream(filepath)) {
+loader::loader(const char* filepath) : file(new std::fstream(filepath)) {
     if (!(*file))
-        throw runtime_error("File error");
+        throw std::runtime_error("File error");
 }
