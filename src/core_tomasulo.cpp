@@ -221,28 +221,47 @@ int ALU::tick() {
 ALU::ALU(core_session* c) : core(c){};
 
 int core_session::superfetch() {
-    // Parser P;
-    // if (jalrflag)
-    //     return 0;
-    // for (int i = 0; i < 32; i++) {
-    // }
-    // mempair m;
-    // m.address     = core->npc;
-    // m.instruction = core->memory.get(core->npc);
-    // core->cID.enqueue(m);
-    // if ((P.rearrange(m.instruction) & 0b1111111) == 0b1100011) {
-    //     auto C = P.Splitter(m.instruction, m.address);
-    //     if (core->Pr.query(C.addr))
-    //         core->npc = C.addr + P.fint(C.imm);
-    //     else
-    //         core->npc = m.address + 4;
-    //     // }
-    // } else if ((P.rearrange(m.instruction) & 0b1111111) == 0b1101111) {
-    //     auto C    = P.Splitter(m.instruction, m.address);
-    //     core->npc = C.addr + P.fint(C.imm);
-    // } else {
-    //     // else {
-    //     core->npc = m.address + 4;
-    // }
-    // return 0;
+    Parser P;
+    for (int i = 0; i < 32; i++) {
+        if (RS[i].empty) {
+            auto z = getunocpy(current);
+            branchcnt im;
+            excute e;
+            while (true) {
+                if (!z.first)
+                    return 0;
+                im = z.second;
+                e  = P.Splitter(PCfile[im.get()], memory.get(PCfile[im.get()]));
+                if (e.instruction != instr::B || branchunsolve != 4)
+                    break;
+                stall[im.get()] = true;
+                z               = getunocpy(current);
+            }
+            RS[i].load(e, im);
+            switch (e.instruction) {
+            case instr::B: {
+                prediction[im.get()] = (Pr.query(im.get()) << 1) - 1;
+                branchunsolve++;
+                branchcnt imt = im, imf = im;
+                imt.ins(1);
+                imf.ins(0);
+                PCfile[imt.get()] = PCfile[im.get()] + (int)e.imm;
+                PCfile[imf.get()] = PCfile[im.get()] + 4;
+                stall[im.get()]   = true;
+            } break;
+            case instr::J:
+                PCfile[im.get()] = PCfile[im.get()] + (int)e.imm;
+                break;
+            case instr::T:
+            case instr::Ij:
+                PCfile[im.get()] = PCfile[im.get()] + 4;
+                stall[im.get()]  = true;
+                break;
+            default:
+                PCfile[im.get()] = PCfile[im.get()] + 4;
+                break;
+            }
+        }
+    }
+    return 0;
 };

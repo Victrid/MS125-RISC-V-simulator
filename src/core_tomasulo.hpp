@@ -3,6 +3,7 @@
 #include "globaldef.hpp"
 #include "memory.hpp"
 #include "parser.hpp"
+#include "predictor.hpp"
 #include <queue>
 class core_session;
 
@@ -83,6 +84,16 @@ public:
 
     CDB bus;
 
+    taddr PCfile[16];
+
+    Predictor Pr;
+
+    int prediction[16];
+    int stall[16];
+
+    //FETCH 4 predict command then 1 predict fail branch command
+    //to have some kind of speculation.
+
     core_session(const char* ch);
     core_session();
 
@@ -97,6 +108,8 @@ public:
     void branch_select(branchcnt s);
 
     int superfetch();
+
+    std::pair<bool, branchcnt> getunocpy(branchcnt);
 };
 
 #endif
