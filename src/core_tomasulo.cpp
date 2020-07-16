@@ -72,68 +72,69 @@ int ALU::tick() {
     if (!empty) {
         switch (Action.instruction) {
         case instr::T:
-            core->term();
-        case instr::B:
-            //     switch (Action.funct3) {
-            //     case 0b000: //BEQ
-            //         if (Action.rs1 != Action.rs2)
-            //             return 0;
-            //         break;
-            //     case 0b001: //BNE
-            //         if (Action.rs1 == Action.rs2)
-            //             return 0;
-            //         break;
-            //     case 0b100: //BLT
-            //         if (P.fint(Action.rs1) >= P.fint(Action.rs2))
-            //             return 0;
-            //         break;
-            //     case 0b101: //BGE
-            //         if (P.fint(Action.rs1) < P.fint(Action.rs2))
-            //             return 0;
-            //         break;
-            //     case 0b110: //BLTU
-            //         if (Action.rs1 >= Action.rs2)
-            //             return 0;
-            //         break;
-            //     case 0b111: //BGEU
-            //         if (Action.rs1 < Action.rs2)
-            //             return 0;
-            //         break;
-            //     }
-            //     core->jumpstall();
-            //     core->pcmod(Action.addr + P.fint(Action.imm));
-            break;
+            //core->term();
+            //Termination with branches
+        case instr::B: {
+            bool jump = true;
+            switch (Action.funct3) {
+            case 0b000: //BEQ
+                if (Action.rs1 != Action.rs2)
+                    jump = false;
+                break;
+            case 0b001: //BNE
+                if (Action.rs1 == Action.rs2)
+                    jump = false;
+                break;
+            case 0b100: //BLT
+                if (P.fint(Action.rs1) >= P.fint(Action.rs2))
+                    jump = false;
+                break;
+            case 0b101: //BGE
+                if (P.fint(Action.rs1) < P.fint(Action.rs2))
+                    jump = false;
+                break;
+            case 0b110: //BLTU
+                if (Action.rs1 >= Action.rs2)
+                    jump = false;
+                break;
+            case 0b111: //BGEU
+                if (Action.rs1 < Action.rs2)
+                    jump = false;
+                break;
+            }
+            branchselect.ins(jump);
+            core->branch_select(branchselect);
+        } break;
         case instr::J: //JAL
-                       //     core->jumpstall();
-                       //     core->pcmod(Action.addr + P.fint(Action.imm));
-                       //     man.rdproc = true;
-                       //     man.rdwr   = mempair{Action.rd, Action.addr + 4};
-                       //     core->cMEM.enqueue(man);
+            core->bus.publish(restation, Action.addr + 4);
             break;
         case instr::U: //LUI
-            core->bus.publish(Action.rd, Action.imm, branchselect);
+            core->bus.publish(restation, Action.imm);
             break;
         case instr::Ua: //AUIPC
-            core->bus.publish(Action.rd, Action.imm + Action.addr, branchselect);
+            core->bus.publish(restation, Action.imm + Action.addr);
             break;
-        case instr::S:
-            // man.rdproc  = false;
-            // man.read    = false;
-            // man.address = Action.rs1 + P.fint(Action.imm);
-            // man.content = Action.rs2;
-            // man.bits    = Loadbits[Action.funct3];
-            // core->memqueue.enqueue(man);
-            break;
-        case instr::Il:
-            // P.padimm(Action.imm, 12);
-            // man.rdproc  = false;
-            // man.read    = true;
-            // man.address = Action.rs1 + P.fint(Action.imm);
-            // man.rd      = Action.rd;
-            // man.bits    = Loadbits[Action.funct3];
-            // man.sign    = Loadsign[Action.funct3];
-            // core->memqueue.enqueue(man);
-            break;
+        case instr::S: {
+            tommemmanip man;
+            man.rdproc        = false;
+            man.read          = false;
+            man.address       = Action.rs1 + P.fint(Action.imm);
+            man.content       = Action.rs2;
+            man.bits          = Loadbits[Action.funct3];
+            man.resstationnum = restation;
+            core->memqueue.enqueue(man);
+        } break;
+        case instr::Il: {
+            tommemmanip man;
+            P.padimm(Action.imm, 12);
+            man.rdproc  = false;
+            man.read    = true;
+            man.address = Action.rs1 + P.fint(Action.imm);
+            man.rd      = Action.rd;
+            man.bits    = Loadbits[Action.funct3];
+            man.sign    = Loadsign[Action.funct3];
+            core->memqueue.enqueue(man);
+        } break;
         case instr::I: {
             P.padimm(Action.imm, 12);
             taddr tas;
@@ -166,14 +167,15 @@ int ALU::tick() {
                     tas = P.ftaddr(P.fint(Action.rs1) >> Action.imm);
                 break;
             }
-            core->bus.publish(Action.rd, tas, branchselect);
+            core->bus.publish(restation, tas);
         } break;
-        case instr::Ij: //JALR
-            // core->jumpstall();
-            // core->pcmod(Action.rs1 + P.fint(Action.imm));
-            // man.rdproc = true;
-            // man.rdwr   = mempair{Action.rd, Action.addr + 4};
-            // core->cMEM.enqueue(man);
+        case instr::Ij:
+            //JALR
+            //After issuing JALR the insturction loader should stall.
+            //This can be solved with modified prediction method.
+            core->pcmod(Action.rs1 + P.fint(Action.imm));
+            core->releasejalr();
+            core->bus.publish(restation, Action.addr + 4);
             break;
         case instr::R:
             taddr tas;
@@ -209,9 +211,11 @@ int ALU::tick() {
                 tas = Action.rs1 & Action.rs2;
                 break;
             }
-            core->bus.publish(Action.rd, tas, branchselect);
+            core->bus.publish(restation, tas);
             break;
         }
     }
     return 0;
 }
+
+ALU::ALU(core_session* c) : core(c){};

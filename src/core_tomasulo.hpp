@@ -45,15 +45,17 @@ public:
 };
 
 class CDB {
-    std::queue<std::pair<taddr, taddr>> branch_res_file[16];
+    std::queue<std::pair<taddr, taddr>> commondatabus;
 
 public:
-    void publish(taddr address, taddr value, shiftreg branchselect);
+    void publish(taddr resstation, taddr value);
     void nowselection(shiftreg branchselect);
 };
 
 class MEM {
     std::queue<std::pair<taddr, memmanip>> q;
+
+public:
     void enqueue(memmanip);
 };
 
@@ -83,6 +85,11 @@ public:
 
     int tick();
     int run();
+
+    void pcmod(taddr);
+    void releasejalr();
+
+    void branch_select(shiftreg s);
 };
 
 #endif
