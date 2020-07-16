@@ -37,6 +37,11 @@ linkfile/libcorepr.a : src/core_predictor.cpp linkfile
 	ar rcs linkfile/libcorepr.a libcorepr.o
 	rm libcorepr.o
 
+linkfile/libcoret.a: src/core_tomasulo.cpp linkfile
+	g++ -O3 -c -o libcoret.o src/core_tomasulo.cpp
+	ar rcs linkfile/libcoret.a libcoret.o
+	rm libcoret.o
+
 # sequential test
 
 test_1: src/test1.cpp linkfile/libmemory.a linkfile/libparser.a
@@ -86,6 +91,15 @@ test_6: src/test6.cpp linkfile/libcorepr.a linkfile/libmemory.a linkfile/libpars
 unit_test_6: test_6
 	./test_6
 
+# tomasulo test
+
+test_7: src/test7.cpp linkfile/libcoret.a linkfile/libmemory.a linkfile/libparser.a
+	g++ -O3 -L linkfile -o test_7 src/test7.cpp -lgtest -lcoret -lmemory -lparser
+
+.PHONY: unit_test_7
+unit_test_7: test_7
+	./test_7
+
 .PHONY: clean
 clean:
 	rm -rf ./test_1
@@ -93,6 +107,7 @@ clean:
 	rm -rf ./test_3
 	rm -rf ./test_5
 	rm -rf ./test_6
+	rm -rf ./test_7
 	rm -rf ./code
 	rm -rf ./test_gcovr
 	rm -rf ./*.gcda

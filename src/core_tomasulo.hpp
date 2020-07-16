@@ -10,23 +10,25 @@ class core_session;
 struct rentab {
     taddr tab[16];
     taddr& operator[](const branchcnt& branch);
+    void branching(branchcnt& father);
     //selecting a branch will copy the whole rename table.
 };
 
 class resstation {
     unsigned int number;
-    core_session* core;
     command exc;
     bool waiting_rs1 = true;
     bool waiting_rs2 = true;
 
 public:
+    core_session* core;
     bool empty = true;
     bool ready = false;
     bool busy  = false;
     branchcnt branchselect;
     void CDBcall(taddr regname, taddr value);
     resstation(core_session* c);
+    resstation(){};
     void load(excute command, branchcnt branchselect);
     void issue(int alu);
     void release();
@@ -43,6 +45,7 @@ public:
     int load(excute m, taddr restation, branchcnt branchselect);
     int tick();
     ALU(core_session* c);
+    ALU(){};
 };
 
 class CDB {
@@ -57,15 +60,13 @@ class MEM {
     std::queue<std::pair<taddr, memmanip>> q;
 
 public:
-    void enqueue(memmanip);
+    void enqueue(taddr,memmanip);
 };
 
 class core_session {
 public:
     bool termflag;
     bool terminated;
-
-    bool jalrflag;
 
     taddr reg[32];
     taddr renametable[32];
@@ -102,7 +103,7 @@ public:
     int tick();
     int run();
 
-    void pcmod(taddr);
+    void pcmodandrelease(taddr,branchcnt);
     void releasejalr();
 
     void branch_select(branchcnt s);

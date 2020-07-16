@@ -63,8 +63,9 @@ struct branchcnt {
         return reg[0] << 3 | reg[1] << 2 | reg[2] << 1 | reg[3];
     }
     void ins(bool value) {
-        digit++;
         reg[digit] = value;
+        digit++;
+        digit %= 4;
         return;
     }
     branchcnt& operator=(const branchcnt& rhs) {
@@ -74,6 +75,11 @@ struct branchcnt {
         for (int i = 0; i < 4; i++)
             reg[i] = rhs.reg[i];
         return *this;
+    }
+    branchcnt() {
+        for (int i = 0; i < 4; i++)
+            reg[i] = 0;
+        digit = 0;
     }
 };
 

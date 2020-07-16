@@ -2,6 +2,14 @@
 
 using namespace std;
 
+core_session::core_session(const char* ch) {
+    memory.memload(ch);
+    for (int i = 0; i < 32; i++)
+        RS[i].core = this;
+    for (int i = 0; i < 4; i++)
+        A[i].core = this;
+};
+
 taddr& rentab::operator[](const branchcnt& branch) {
     return tab[branch.get()];
 }
@@ -122,7 +130,7 @@ int ALU::tick() {
             man.content       = Action.rs2;
             man.bits          = Loadbits[Action.funct3];
             man.resstationnum = restation;
-            core->memqueue.enqueue(man);
+            core->memqueue.enqueue(restation,man);
         } break;
         case instr::Il: {
             tommemmanip man;
@@ -133,7 +141,7 @@ int ALU::tick() {
             man.rd      = Action.rd;
             man.bits    = Loadbits[Action.funct3];
             man.sign    = Loadsign[Action.funct3];
-            core->memqueue.enqueue(man);
+            core->memqueue.enqueue(restation, man);
         } break;
         case instr::I: {
             P.padimm(Action.imm, 12);
@@ -173,7 +181,7 @@ int ALU::tick() {
             //JALR
             //After issuing JALR the insturction loader should stall.
             //This can be solved with modified prediction method.
-            core->pcmod(Action.rs1 + P.fint(Action.imm));
+            core->pcmodandrelease(Action.rs1 + P.fint(Action.imm), branchselect);
             core->releasejalr();
             core->bus.publish(restation, Action.addr + 4);
             break;
@@ -215,6 +223,14 @@ int ALU::tick() {
             break;
         }
     }
+    return 0;
+}
+
+int ALU::load(excute m, taddr res, branchcnt bs) {
+    Action       = m;
+    restation    = res;
+    branchselect = bs;
+    empty        = false;
     return 0;
 }
 
@@ -282,3 +298,10 @@ std::pair<bool, branchcnt> core_session::getunocpy(branchcnt cur) {
     } else
         return std::pair<bool, branchcnt>(true, cur);
 }
+
+void core_session::pcmodandrelease(taddr t, branchcnt b) {
+    PCfile[b.get()] = t;
+    stall[b.get()]  = false;
+};
+
+void MEM::enqueue(taddr resstation, memmanip m) { q.push(std::pair<taddr, memmanip>(resstation, m)); }
