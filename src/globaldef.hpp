@@ -42,7 +42,15 @@ struct memmanip {
     mempair rdwr;
 };
 
+struct tommemmanip : public memmanip {
+    taddr resstationnum;
+};
+
 typedef command excute;
+
+struct tomexcute : public excute {
+    taddr resstationnum;
+};
 
 const taddr Loadbits[] = {8, 16, 32, 0, 8, 16};
 const bool Loadsign[]  = {true, true, true, false, false, false};
@@ -50,7 +58,7 @@ const bool Loadsign[]  = {true, true, true, false, false, false};
 struct shiftreg {
     unsigned char digit = 4;
     taddr reg;
-    taddr get() const{
+    taddr get() const {
         return reg - (reg >> digit << digit);
     }
     void ins(bool value) {

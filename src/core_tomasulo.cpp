@@ -57,153 +57,159 @@ void resstation::load(excute command, shiftreg bs) {
     exc                      = command;
 }
 
+void resstation::issue(int alu) {
+    core->A[alu].load(exc, number, branchselect);
+    busy = true;
+}
+
+void resstation::release() {
+    busy  = false;
+    empty = true;
+    ready = false;
+}
+
 int ALU::tick() {
     if (!empty) {
-        memmanip man;
         switch (Action.instruction) {
         case instr::T:
-            return core->term();
-        // case instr::B:
-        //     switch (Action.funct3) {
-        //     case 0b000: //BEQ
-        //         if (Action.rs1 != Action.rs2)
-        //             return 0;
-        //         break;
-        //     case 0b001: //BNE
-        //         if (Action.rs1 == Action.rs2)
-        //             return 0;
-        //         break;
-        //     case 0b100: //BLT
-        //         if (P.fint(Action.rs1) >= P.fint(Action.rs2))
-        //             return 0;
-        //         break;
-        //     case 0b101: //BGE
-        //         if (P.fint(Action.rs1) < P.fint(Action.rs2))
-        //             return 0;
-        //         break;
-        //     case 0b110: //BLTU
-        //         if (Action.rs1 >= Action.rs2)
-        //             return 0;
-        //         break;
-        //     case 0b111: //BGEU
-        //         if (Action.rs1 < Action.rs2)
-        //             return 0;
-        //         break;
-        //     }
-        //     core->jumpstall();
-        //     core->pcmod(Action.addr + P.fint(Action.imm));
-        //     break;
-        // case instr::J: //JAL
-        //     core->jumpstall();
-        //     core->pcmod(Action.addr + P.fint(Action.imm));
-        //     man.rdproc = true;
-        //     man.rdwr   = mempair{Action.rd, Action.addr + 4};
-        //     core->cMEM.enqueue(man);
-        //     break;
+            core->term();
+        case instr::B:
+            //     switch (Action.funct3) {
+            //     case 0b000: //BEQ
+            //         if (Action.rs1 != Action.rs2)
+            //             return 0;
+            //         break;
+            //     case 0b001: //BNE
+            //         if (Action.rs1 == Action.rs2)
+            //             return 0;
+            //         break;
+            //     case 0b100: //BLT
+            //         if (P.fint(Action.rs1) >= P.fint(Action.rs2))
+            //             return 0;
+            //         break;
+            //     case 0b101: //BGE
+            //         if (P.fint(Action.rs1) < P.fint(Action.rs2))
+            //             return 0;
+            //         break;
+            //     case 0b110: //BLTU
+            //         if (Action.rs1 >= Action.rs2)
+            //             return 0;
+            //         break;
+            //     case 0b111: //BGEU
+            //         if (Action.rs1 < Action.rs2)
+            //             return 0;
+            //         break;
+            //     }
+            //     core->jumpstall();
+            //     core->pcmod(Action.addr + P.fint(Action.imm));
+            break;
+        case instr::J: //JAL
+                       //     core->jumpstall();
+                       //     core->pcmod(Action.addr + P.fint(Action.imm));
+                       //     man.rdproc = true;
+                       //     man.rdwr   = mempair{Action.rd, Action.addr + 4};
+                       //     core->cMEM.enqueue(man);
+            break;
         case instr::U: //LUI
-            man.rdproc = true;
-            man.rdwr   = mempair{Action.rd, Action.imm};
-            core->cMEM.enqueue(man);
+            core->bus.publish(Action.rd, Action.imm, branchselect);
             break;
         case instr::Ua: //AUIPC
-            man.rdproc = true;
-            man.rdwr   = mempair{Action.rd, Action.imm + Action.addr};
-            core->cMEM.enqueue(man);
+            core->bus.publish(Action.rd, Action.imm + Action.addr, branchselect);
             break;
         case instr::S:
-            man.rdproc  = false;
-            man.read    = false;
-            man.address = Action.rs1 + P.fint(Action.imm);
-            man.content = Action.rs2;
-            man.bits    = Loadbits[Action.funct3];
-            core->cMEM.enqueue(man);
+            // man.rdproc  = false;
+            // man.read    = false;
+            // man.address = Action.rs1 + P.fint(Action.imm);
+            // man.content = Action.rs2;
+            // man.bits    = Loadbits[Action.funct3];
+            // core->memqueue.enqueue(man);
             break;
         case instr::Il:
-            P.padimm(Action.imm, 12);
-            man.rdproc  = false;
-            man.read    = true;
-            man.address = Action.rs1 + P.fint(Action.imm);
-            man.rd      = Action.rd;
-            man.bits    = Loadbits[Action.funct3];
-            man.sign    = Loadsign[Action.funct3];
-            core->cMEM.enqueue(man);
+            // P.padimm(Action.imm, 12);
+            // man.rdproc  = false;
+            // man.read    = true;
+            // man.address = Action.rs1 + P.fint(Action.imm);
+            // man.rd      = Action.rd;
+            // man.bits    = Loadbits[Action.funct3];
+            // man.sign    = Loadsign[Action.funct3];
+            // core->memqueue.enqueue(man);
             break;
-        case instr::I:
-            man.rdproc = true;
+        case instr::I: {
             P.padimm(Action.imm, 12);
+            taddr tas;
             switch (Action.funct3) {
             case 0b000: //ADDI
-                man.rdwr = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) + P.fint(Action.imm))};
+                tas = P.ftaddr(P.fint(Action.rs1) + P.fint(Action.imm));
                 break;
             case 0b010: //SLTI
-                man.rdwr = mempair{Action.rd, (P.fint(Action.rs1) < P.fint(Action.imm))};
+                tas = (P.fint(Action.rs1) < P.fint(Action.imm));
                 break;
             case 0b011: //SLTIU
-                man.rdwr = mempair{Action.rd, (Action.rs1 < Action.imm)};
+                tas = (Action.rs1 < Action.imm);
                 break;
             case 0b100: //XORI
-                man.rdwr = mempair{Action.rd, (Action.rs1 ^ Action.imm)};
+                tas = (Action.rs1 ^ Action.imm);
                 break;
             case 0b110: //ORI
-                man.rdwr = mempair{Action.rd, (Action.rs1 | Action.imm)};
+                tas = (Action.rs1 | Action.imm);
                 break;
             case 0b111: //ANDI
-                man.rdwr = mempair{Action.rd, (Action.rs1 & Action.imm)};
+                tas = (Action.rs1 & Action.imm);
                 break;
             case 0b001: //SLLI
-                man.rdwr = mempair{Action.rd, (Action.rs1 << Action.imm)};
+                tas = (Action.rs1 << Action.imm);
                 break;
             case 0b101:
                 if (Action.funct7 == 0) //SRLI
-                    man.rdwr = mempair{Action.rd, (Action.rs1 >> Action.imm)};
+                    tas = (Action.rs1 >> Action.imm);
                 else //SRAI
-                    man.rdwr = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) >> Action.imm)};
+                    tas = P.ftaddr(P.fint(Action.rs1) >> Action.imm);
                 break;
             }
-            core->cMEM.enqueue(man);
-            break;
+            core->bus.publish(Action.rd, tas, branchselect);
+        } break;
         case instr::Ij: //JALR
-            core->jumpstall();
-            core->pcmod(Action.rs1 + P.fint(Action.imm));
-            man.rdproc = true;
-            man.rdwr   = mempair{Action.rd, Action.addr + 4};
-            core->cMEM.enqueue(man);
+            // core->jumpstall();
+            // core->pcmod(Action.rs1 + P.fint(Action.imm));
+            // man.rdproc = true;
+            // man.rdwr   = mempair{Action.rd, Action.addr + 4};
+            // core->cMEM.enqueue(man);
             break;
         case instr::R:
-            man.rdproc = true;
+            taddr tas;
             switch (Action.funct3) {
             case 0b000:
                 if (Action.funct7 == 0) //ADD
-                    man.rdwr = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) + P.fint(Action.rs2))};
+                    tas = P.ftaddr(P.fint(Action.rs1) + P.fint(Action.rs2));
                 else //SUB
-                    man.rdwr = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) - P.fint(Action.rs2))};
+                    tas = P.ftaddr(P.fint(Action.rs1) - P.fint(Action.rs2));
                 break;
             case 0b001: //SLL
-                man.rdwr = mempair{Action.rd, Action.rs1 << (Action.rs2 & 0b11111)};
+                tas = Action.rs1 << (Action.rs2 & 0b11111);
                 break;
             case 0b010: //SLT
-                man.rdwr = mempair{Action.rd, (P.fint(Action.rs1) < P.fint(Action.rs2))};
+                tas = (P.fint(Action.rs1) < P.fint(Action.rs2));
                 break;
             case 0b011: //SLTU
-                man.rdwr = mempair{Action.rd, (Action.rs1 < Action.rs2)};
+                tas = (Action.rs1 < Action.rs2);
                 break;
             case 0b100: //XOR
-                man.rdwr = mempair{Action.rd, (Action.rs1 ^ Action.rs2)};
+                tas = (Action.rs1 ^ Action.rs2);
                 break;
             case 0b101:
                 if (Action.funct7 == 0) //SRL
-                    man.rdwr = mempair{Action.rd, (Action.rs1 >> (Action.rs2 & 0b11111))};
+                    tas = (Action.rs1 >> (Action.rs2 & 0b11111));
                 else //SRA
-                    man.rdwr = mempair{Action.rd, P.ftaddr(P.fint(Action.rs1) >> (Action.rs2 & 0b11111))};
+                    tas = P.ftaddr(P.fint(Action.rs1) >> (Action.rs2 & 0b11111));
                 break;
             case 0b110: //OR
-                man.rdwr = mempair{Action.rd, Action.rs1 | Action.rs2};
+                tas = Action.rs1 | Action.rs2;
                 break;
             case 0b111: //AND
-                man.rdwr = mempair{Action.rd, Action.rs1 & Action.rs2};
+                tas = Action.rs1 & Action.rs2;
                 break;
             }
-            core->cMEM.enqueue(man);
+            core->bus.publish(Action.rd, tas, branchselect);
             break;
         }
     }

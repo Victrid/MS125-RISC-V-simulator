@@ -22,11 +22,13 @@ class resstation {
 public:
     bool empty = true;
     bool ready = false;
+    bool busy  = false;
     shiftreg branchselect;
     void CDBcall(taddr regname, taddr value);
     resstation(core_session* c);
     void load(excute command, shiftreg branchselect);
-    void issue(){};
+    void issue(int alu);
+    void release();
 };
 
 class ALU {
@@ -34,8 +36,10 @@ public:
     core_session* core;
     Parser P;
     excute Action;
+    taddr restation;
+    shiftreg branchselect;
     bool empty;
-    int load(excute m);
+    int load(excute m, taddr restation, shiftreg branchselect);
     int tick();
     ALU(core_session* c);
 };
@@ -48,7 +52,10 @@ public:
     void nowselection(shiftreg branchselect);
 };
 
-class MEM {};
+class MEM {
+    std::queue<std::pair<taddr, memmanip>> q;
+    void enqueue(memmanip);
+};
 
 class core_session {
 public:
