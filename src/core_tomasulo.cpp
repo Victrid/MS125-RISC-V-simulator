@@ -265,3 +265,20 @@ int core_session::superfetch() {
     }
     return 0;
 };
+
+std::pair<bool, branchcnt> core_session::getunocpy(branchcnt cur) {
+    if (stall[cur.get()]) {
+        //TODO speculation
+        branchcnt im1 = cur, im2 = cur;
+        im1.ins(prediction[cur.get()]);
+        auto pp = getunocpy(im1);
+        if (pp.first)
+            return std::pair<bool, branchcnt>(true, pp.second);
+        im2.ins(!prediction[cur.get()]);
+        pp = getunocpy(im2);
+        if (pp.first)
+            return std::pair<bool, branchcnt>(true, pp.second);
+        return std::pair<bool, branchcnt>(false, cur);
+    } else
+        return std::pair<bool, branchcnt>(true, cur);
+}
