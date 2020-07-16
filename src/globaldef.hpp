@@ -47,4 +47,23 @@ typedef command excute;
 const taddr Loadbits[] = {8, 16, 32, 0, 8, 16};
 const bool Loadsign[]  = {true, true, true, false, false, false};
 
+struct shiftreg {
+    unsigned char digit = 4;
+    taddr reg;
+    taddr get() const{
+        return reg - (reg >> digit << digit);
+    }
+    void ins(bool value) {
+        reg = ((reg << 1) | value);
+        return;
+    }
+    shiftreg& operator=(const shiftreg& rhs) {
+        if (&rhs == this)
+            return *this;
+        digit = rhs.digit;
+        reg   = rhs.reg;
+        return *this;
+    }
+};
+
 #endif
