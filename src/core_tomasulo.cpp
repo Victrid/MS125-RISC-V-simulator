@@ -2,7 +2,7 @@
 
 using namespace std;
 
-taddr& rentab::operator[](const shiftreg& branch) {
+taddr& rentab::operator[](const branchcnt& branch) {
     return tab[branch.get()];
 }
 
@@ -22,7 +22,7 @@ void resstation::CDBcall(taddr regname, taddr value) {
 
 resstation::resstation(core_session* c) : core(c){};
 
-void resstation::load(excute command, shiftreg bs) {
+void resstation::load(excute command, branchcnt bs) {
     branchselect = bs;
     switch (command.instruction) {
     case instr::T:
@@ -219,3 +219,30 @@ int ALU::tick() {
 }
 
 ALU::ALU(core_session* c) : core(c){};
+
+int core_session::superfetch() {
+    // Parser P;
+    // if (jalrflag)
+    //     return 0;
+    // for (int i = 0; i < 32; i++) {
+    // }
+    // mempair m;
+    // m.address     = core->npc;
+    // m.instruction = core->memory.get(core->npc);
+    // core->cID.enqueue(m);
+    // if ((P.rearrange(m.instruction) & 0b1111111) == 0b1100011) {
+    //     auto C = P.Splitter(m.instruction, m.address);
+    //     if (core->Pr.query(C.addr))
+    //         core->npc = C.addr + P.fint(C.imm);
+    //     else
+    //         core->npc = m.address + 4;
+    //     // }
+    // } else if ((P.rearrange(m.instruction) & 0b1111111) == 0b1101111) {
+    //     auto C    = P.Splitter(m.instruction, m.address);
+    //     core->npc = C.addr + P.fint(C.imm);
+    // } else {
+    //     // else {
+    //     core->npc = m.address + 4;
+    // }
+    // return 0;
+};

@@ -55,21 +55,24 @@ struct tomexcute : public excute {
 const taddr Loadbits[] = {8, 16, 32, 0, 8, 16};
 const bool Loadsign[]  = {true, true, true, false, false, false};
 
-struct shiftreg {
-    unsigned char digit = 4;
-    taddr reg;
+struct branchcnt {
+    //Here branch should use a loop sequence instead of shift register.
+    unsigned char digit = 0;
+    bool reg[4];
     taddr get() const {
-        return reg - (reg >> digit << digit);
+        return reg[0] << 3 | reg[1] << 2 | reg[2] << 1 | reg[3];
     }
     void ins(bool value) {
-        reg = ((reg << 1) | value);
+        digit++;
+        reg[digit] = value;
         return;
     }
-    shiftreg& operator=(const shiftreg& rhs) {
+    branchcnt& operator=(const branchcnt& rhs) {
         if (&rhs == this)
             return *this;
         digit = rhs.digit;
-        reg   = rhs.reg;
+        for (int i = 0; i < 4; i++)
+            reg[i] = rhs.reg[i];
         return *this;
     }
 };

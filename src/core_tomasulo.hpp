@@ -8,7 +8,7 @@ class core_session;
 
 struct rentab {
     taddr tab[16];
-    taddr& operator[](const shiftreg& branch);
+    taddr& operator[](const branchcnt& branch);
     //selecting a branch will copy the whole rename table.
 };
 
@@ -23,10 +23,10 @@ public:
     bool empty = true;
     bool ready = false;
     bool busy  = false;
-    shiftreg branchselect;
+    branchcnt branchselect;
     void CDBcall(taddr regname, taddr value);
     resstation(core_session* c);
-    void load(excute command, shiftreg branchselect);
+    void load(excute command, branchcnt branchselect);
     void issue(int alu);
     void release();
 };
@@ -37,9 +37,9 @@ public:
     Parser P;
     excute Action;
     taddr restation;
-    shiftreg branchselect;
+    branchcnt branchselect;
     bool empty;
-    int load(excute m, taddr restation, shiftreg branchselect);
+    int load(excute m, taddr restation, branchcnt branchselect);
     int tick();
     ALU(core_session* c);
 };
@@ -49,7 +49,7 @@ class CDB {
 
 public:
     void publish(taddr resstation, taddr value);
-    void nowselection(shiftreg branchselect);
+    void nowselection(branchcnt branchselect);
 };
 
 class MEM {
@@ -64,10 +64,15 @@ public:
     bool termflag;
     bool terminated;
 
+    bool jalrflag;
+
     taddr reg[32];
     taddr renametable[32];
 
+    taddr currentbranches;
+
     int branchunsolve = 0;
+    branchcnt current;
 
     rentab rt[32];
     resstation RS[32];
@@ -89,7 +94,9 @@ public:
     void pcmod(taddr);
     void releasejalr();
 
-    void branch_select(shiftreg s);
+    void branch_select(branchcnt s);
+
+    int superfetch();
 };
 
 #endif
