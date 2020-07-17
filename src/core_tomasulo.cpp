@@ -8,10 +8,22 @@ core_session::core_session(const char* ch) {
         RS[i].core = this;
     for (int i = 0; i < 4; i++)
         A[i].core = this;
+    for (int i = 0; i < 16; i++) {
+        stall[i]  = 0;
+        PCfile[i] = 0;
+    }
+    return;
 };
 
 taddr& rentab::operator[](const branchcnt& branch) {
     return tab[branch.get()];
+}
+
+rentab::rentab() {
+    for (int i = 0; i < 16; i++) {
+        tab[i] = 0;
+    }
+    return;
 }
 
 void resstation::CDBcall(taddr regname, taddr value) {
@@ -25,7 +37,7 @@ void resstation::CDBcall(taddr regname, taddr value) {
         exc.rs2     = value;
         waiting_rs2 = false;
     }
-    ready = (waiting_rs1 || waiting_rs2);
+    ready = !(waiting_rs1 || waiting_rs2);
 }
 
 resstation::resstation(core_session* c) : core(c){};
@@ -49,9 +61,18 @@ void resstation::load(excute command, branchcnt bs) {
             command.rs2 = core->rt[command.rs2][bs];
             waiting_rs2 = true;
         }
+        if (core->rt[command.rs1][bs] == command.rs1) {
+            command.rs1 = core->reg[command.rs1];
+            waiting_rs1 = false;
+        } else {
+            command.rs1 = core->rt[command.rs1][bs];
+            waiting_rs1 = true;
+        }
+        break;
     case instr::Il:
     case instr::I:
     case instr::Ij:
+        waiting_rs2 = false;
         if (core->rt[command.rs1][bs] == command.rs1) {
             command.rs1 = core->reg[command.rs1];
             waiting_rs1 = false;
@@ -63,6 +84,8 @@ void resstation::load(excute command, branchcnt bs) {
     }
     core->rt[command.rd][bs] = number & 0x80000000;
     exc                      = command;
+    ready                    = !(waiting_rs1 || waiting_rs2);
+    empty                    = false;
 }
 
 void resstation::issue(int alu) {
@@ -130,7 +153,7 @@ int ALU::tick() {
             man.content       = Action.rs2;
             man.bits          = Loadbits[Action.funct3];
             man.resstationnum = restation;
-            core->memqueue.enqueue(restation,man);
+            core->memqueue.enqueue(restation, man);
         } break;
         case instr::Il: {
             tommemmanip man;
@@ -182,7 +205,6 @@ int ALU::tick() {
             //After issuing JALR the insturction loader should stall.
             //This can be solved with modified prediction method.
             core->pcmodandrelease(Action.rs1 + P.fint(Action.imm), branchselect);
-            core->releasejalr();
             core->bus.publish(restation, Action.addr + 4);
             break;
         case instr::R:
@@ -234,7 +256,7 @@ int ALU::load(excute m, taddr res, branchcnt bs) {
     return 0;
 }
 
-ALU::ALU(core_session* c) : core(c){};
+ALU::ALU(core_session* c) : core(c), empty(true){};
 
 int core_session::superfetch() {
     Parser P;
@@ -243,16 +265,13 @@ int core_session::superfetch() {
             auto z = getunocpy(current);
             branchcnt im;
             excute e;
-            while (true) {
-                if (!z.first)
-                    return 0;
-                im = z.second;
-                e  = P.Splitter(PCfile[im.get()], memory.get(PCfile[im.get()]));
-                if (e.instruction != instr::B || branchunsolve != 4)
-                    break;
-                stall[im.get()] = true;
-                z               = getunocpy(current);
-            }
+            if (!z.first)
+                return 0;
+            im = z.second;
+            taddr t=memory.get(PCfile[im.get()]);if(t==0)
+            e  = P.Splitter(t, PCfile[im.get()]);
+            if (e.instruction == instr::B && branchunsolve == 4)
+                return 0;
             RS[i].load(e, im);
             switch (e.instruction) {
             case instr::B: {
@@ -278,6 +297,7 @@ int core_session::superfetch() {
                 break;
             }
         }
+        cin.get();
     }
     return 0;
 };
@@ -305,3 +325,12 @@ void core_session::pcmodandrelease(taddr t, branchcnt b) {
 };
 
 void MEM::enqueue(taddr resstation, memmanip m) { q.push(std::pair<taddr, memmanip>(resstation, m)); }
+
+void core_session::branch_select(branchcnt s) {
+    current = s;
+    branchunsolve--;
+}
+
+void CDB::publish(taddr resstation, taddr value) {
+    commondatabus.push(std::pair<taddr, taddr>(resstation, value));
+};

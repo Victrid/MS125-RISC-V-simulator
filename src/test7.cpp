@@ -33,6 +33,7 @@ TEST(TomasuloPartTest, renametab_test) {
 
 TEST(TomasuloPartTest, core_test) {
     core_session C("dataset/pipeline-testset/test-datahazard.data");
+    C.superfetch();
 }
 
 int main(int argc, char** argv) {

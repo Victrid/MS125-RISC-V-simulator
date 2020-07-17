@@ -11,6 +11,7 @@ struct rentab {
     taddr tab[16];
     taddr& operator[](const branchcnt& branch);
     void branching(branchcnt& father);
+    rentab();
     //selecting a branch will copy the whole rename table.
 };
 
@@ -69,9 +70,6 @@ public:
     bool terminated;
 
     taddr reg[32];
-    taddr renametable[32];
-
-    taddr currentbranches;
 
     int branchunsolve = 0;
     branchcnt current;
