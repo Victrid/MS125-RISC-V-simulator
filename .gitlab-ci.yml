@@ -1,7 +1,6 @@
 stages:
   - clean
   - build
-  - test
 
 clean:
   stage: clean
@@ -11,26 +10,4 @@ clean:
 build:
   stage: build
   script:
-    - echo "Nothing to do now."
-
-test1:
-  stage: test
-  script:
-    - make unit_test_1
-
-test2:
-  stage: test
-  script:
-    - make unit_test_2
-
-test3:
-  stage: test
-  script:
-    - make unit_test_3
-    
-test_coverage:
-  stage: test
-  script:
-    - make test_gcovr
-    - ./test_gcovr
-    - gcovr -r .
+    - make code

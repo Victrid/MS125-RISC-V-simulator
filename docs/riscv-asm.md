@@ -1,5 +1,7 @@
 # RISC-V 汇编程序员指南
 
+*Palmer Dabbelt, Michael Clark, and Alex Bradbury*
+
 # 命令行参数
 
 与其在这里重复，我觉得可能去翻binutils的文档可能更好。

@@ -7,7 +7,7 @@
 class core_session {
 public:
     //MEMORY
-    memory M;
+    Memory M;
     //PARSER
     Parser P;
     //PC
@@ -24,6 +24,8 @@ public:
     taddr rd;
     taddr imm;
     bool frd;
+
+    std::istream& input;
 
     taddr fterm;
 
@@ -48,8 +50,9 @@ public:
         taddr regp;
         bool sign;
     } mreq;
-    core_session(const char* c);
-    ostream& printmem(ostream& os);
+    core_session(std::istream& is, std::istream& os);
+    core_session();
+    std::ostream& printmem(std::ostream& os);
     int tick();
     int cycle();
     int run();

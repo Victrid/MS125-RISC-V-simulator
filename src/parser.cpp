@@ -22,7 +22,14 @@ taddr Parser::ftaddr(const int& t) {
 }
 
 command Parser::Splitter(unsigned int operation, unsigned int baseaddr) {
-    operation    = rearrange(operation);
+    operation = rearrange(operation);
+    if (operation == 0x0ff00513)
+        return command(baseaddr, false);
+    if (operation == 0xFF00FF00) {
+        command c;
+        c.instruction = instr::input;
+        return c;
+    }
     taddr opcode = (operation - (operation >> 7 << 7)) >> 2;
     switch (opcode) {
     case 0b01100:
@@ -60,7 +67,7 @@ taddr Parser::getdigits(taddr content, int l, int r) {
 command Parser::RSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::R;
+    c.instruction = instr::R;
     c.rd          = getdigits(operation, 6, 11);
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
@@ -71,7 +78,7 @@ command Parser::RSplitter(unsigned int operation, unsigned int baseaddr) {
 command Parser::ISplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = getdigits(operation, 1, 6) == 0b11001 ? command::Ij : command::I;
+    c.instruction = getdigits(operation, 1, 6) == 0b11001 ? instr::Ij : instr::I;
     c.rd          = getdigits(operation, 6, 11);
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
@@ -82,7 +89,7 @@ command Parser::ISplitter(unsigned int operation, unsigned int baseaddr) {
 command Parser::IlSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::Il;
+    c.instruction = instr::Il;
     c.rd          = getdigits(operation, 6, 11);
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
@@ -93,7 +100,7 @@ command Parser::IlSplitter(unsigned int operation, unsigned int baseaddr) {
 command Parser::IsSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::I;
+    c.instruction = instr::I;
     c.rd          = getdigits(operation, 6, 11);
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
@@ -104,7 +111,7 @@ command Parser::IsSplitter(unsigned int operation, unsigned int baseaddr) {
 command Parser::SSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::S;
+    c.instruction = instr::S;
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
     c.rs2         = getdigits(operation, 19, 24);
@@ -115,7 +122,7 @@ command Parser::SSplitter(unsigned int operation, unsigned int baseaddr) {
 command Parser::USplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = getdigits(operation, 1, 6) == 0b00101 ? command::Ua : command::U;
+    c.instruction = getdigits(operation, 1, 6) == 0b00101 ? instr::Ua : instr::U;
     c.rd          = getdigits(operation, 6, 11);
     c.imm         = getdigits(operation, 11, 31) << 12;
     return c;
@@ -123,7 +130,7 @@ command Parser::USplitter(unsigned int operation, unsigned int baseaddr) {
 command Parser::BSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::B;
+    c.instruction = instr::B;
     c.funct3      = getdigits(operation, 11, 14);
     c.rs1         = getdigits(operation, 14, 19);
     c.rs2         = getdigits(operation, 19, 24);
@@ -135,7 +142,7 @@ command Parser::BSplitter(unsigned int operation, unsigned int baseaddr) {
 command Parser::JSplitter(unsigned int operation, unsigned int baseaddr) {
     command c;
     c.addr        = baseaddr;
-    c.instruction = command::J;
+    c.instruction = instr::J;
     c.rd          = getdigits(operation, 6, 11);
     c.funct3      = getdigits(operation, 11, 14);
     c.imm         = (getdigits(operation, 20, 30) << 1) | (getdigits(operation, 19, 20) << 11) | (getdigits(operation, 11, 19) << 12) | (getdigits(operation, 30, 31) << 20);
@@ -143,7 +150,7 @@ command Parser::JSplitter(unsigned int operation, unsigned int baseaddr) {
     return c;
 }
 
-ostream& Parser::displayer(command& z, ostream& os) {
+std::ostream& Parser::displayer(command& z, std::ostream& os) {
     const char* cc[] = {
         "R ",
         "I ",
@@ -190,7 +197,9 @@ ostream& Parser::displayer(command& z, ostream& os) {
     // os << std::hex << z.addr << '\t';
     // os << cc[z.instruction] << ' ';
     switch (z.instruction) {
-    case command::B:
+    case instr::T:
+        return os;
+    case instr::B:
         switch (z.funct3) {
         case 0b000:
             os << "beq\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::hex << z.addr + fint(z.imm);
@@ -212,16 +221,16 @@ ostream& Parser::displayer(command& z, ostream& os) {
             break;
         }
         break;
-    case command::J:
+    case instr::J:
         os << "jal\t" << reg[z.rd] << ',' << std::hex << z.addr + fint(z.imm);
         break;
-    case command::U:
+    case instr::U:
         os << "lui\t" << reg[z.rd] << "\t0x" << std::hex << (z.imm >> 12);
         break;
-    case command::Ua:
+    case instr::Ua:
         os << "auipc\t" << reg[z.rd] << ',' << std::hex << z.imm;
         break;
-    case command::S:
+    case instr::S:
         switch (z.funct3) {
         case 0b000:
             os << "sb\t" << reg[z.rs1] << ',' << reg[z.rs2] << ',' << std::dec << fint(z.imm);
@@ -234,7 +243,7 @@ ostream& Parser::displayer(command& z, ostream& os) {
             break;
         }
         break;
-    case command::Il:
+    case instr::Il:
         switch (z.funct3) {
         case 0b000:
             os << "lb\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
@@ -253,7 +262,7 @@ ostream& Parser::displayer(command& z, ostream& os) {
             break;
         }
         break;
-    case command::I: {
+    case instr::I: {
         switch (z.funct3) {
         case 0b000:
             os << "addi\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::dec << fint(z.imm);
@@ -282,10 +291,10 @@ ostream& Parser::displayer(command& z, ostream& os) {
         }
         break;
     }
-    case command::Ij:
+    case instr::Ij:
         os << "jalr\t" << reg[z.rd] << ',' << reg[z.rs1] << ',' << std::hex << fint(z.imm);
         break;
-    case command::R:
+    case instr::R:
         switch (z.funct3) {
         case 0b000:
             if (z.funct7 == 0)
